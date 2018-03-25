@@ -24,4 +24,4 @@ konvas.addNode({
 
 -  [ ] node resize
 -  [x] node rotate
--  [ ] node locked
+-  [x] node locked

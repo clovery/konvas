@@ -10,14 +10,18 @@ declare class Node {
     layout: {
         rotate: number;
     };
+    isDraggable: boolean;
+    islocked: boolean;
     constructor(data: any);
     private initStyle();
     width: any;
     height: number;
     rotate: number;
     scale: any;
+    lock(): void;
+    unlock(): void;
     move(x: number, y: number): void;
-    draw(): void;
+    render(): void;
     toJSON(): {
         x: number;
         y: number;

@@ -34,10 +34,9 @@ class Dragger {
   private onMouseDown = (e: Event) => {
     const { target } = e
     const targetElem = target as HTMLElement
+    this.active = this.canvas.getNode(targetElem.id)
 
-    if (targetElem.classList.contains('draggable')) {
-      this.active = this.canvas.getNode(targetElem.id)
-
+    if (this.active && this.active.isDraggable) {
       this.dragging = true
 
       if (this.mouse && this.active) {

@@ -1,3 +1,5 @@
+import { isbool } from './utils'
+
 let uid: number = 1
 
 /**
@@ -13,6 +15,9 @@ class Node {
     rotate: number
   } 
 
+  public isDraggable: boolean
+  public islocked: boolean
+
   constructor(data: any) {
     this.el = document.createElement('div')
 
@@ -20,8 +25,10 @@ class Node {
     this.el.id = this.id
 
     this.el.classList.add('node')
-    this.el.classList.add('draggable')
 
+    this.isDraggable = isbool(data.draggable) ? data.draggable : true
+
+    this.islocked = false
     this.data = { ...data }
 
     this.x = this.data.x || 0
@@ -31,7 +38,7 @@ class Node {
       rotate: 0
     }
     this.initStyle()
-    this.draw()
+    this.render()
   }
 
   private initStyle() {
@@ -84,6 +91,16 @@ class Node {
     this.draw()
   }
 
+  public lock() {
+    this.islocked = true
+    this.isDraggable = false
+  }
+
+  public unlock() {
+    this.islocked = false
+    this.isDraggable = true
+  }
+
   public move(x: number, y: number) {
     this.x = x
     this.y = y
@@ -92,9 +109,11 @@ class Node {
     el.style.top = `${y}px`
   }
 
-  public draw() {
+  public render() {
     const el = this.el as HTMLElement
 
+    el.style.left = `${this.x}px`
+    el.style.top = `${this.y}px`
     el.style.width = `${ this.width * this.scale }px`
     el.style.height = `${ this.height * this.scale }px`
   }

@@ -32,7 +32,7 @@ declare class Konvas {
             x: number;
             y: number;
             width: any;
-            height: any;
+            height: number;
             scale: any;
         }[];
     };

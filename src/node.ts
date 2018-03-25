@@ -9,6 +9,9 @@ class Node {
   public id: string
   public x: number
   public y: number
+  public layout: {
+    rotate: number
+  } 
 
   constructor(data: any) {
     this.el = document.createElement('div')
@@ -24,6 +27,9 @@ class Node {
     this.x = this.data.x || 0
     this.y = this.data.y || 0
 
+    this.layout = {
+      rotate: 0
+    }
     this.initStyle()
     this.draw()
   }
@@ -55,8 +61,18 @@ class Node {
     return this.data.height
   }
 
-  set height(val) {
+  set height(val: number) {
     this.data.height = val
+  }
+
+  set rotate(deg: number) {
+    this.layout.rotate = deg
+    const el = this.el as HTMLElement
+    el.style.transform = `rotate(${deg}deg)`
+  }
+
+  get rotate() {
+    return this.layout.rotate
   }
 
   get scale() {

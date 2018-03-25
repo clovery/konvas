@@ -21,6 +21,7 @@ konvas.addNode({
 ```
 
 # todo list
-[ ] node resize
-[ ] node rotate
-[ ] node locked
+
+-  [ ] node resize
+-  [x] node rotate
+-  [ ] node locked

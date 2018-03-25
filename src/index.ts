@@ -10,7 +10,7 @@ interface IOptions {
 */
 
 class Konvas {
-  public elem: Element
+  public el: Element
   private options: any
   private dragger: Dragger
   public nodes: Node[]
@@ -22,7 +22,7 @@ class Konvas {
   } 
 
   constructor(el: Element | string, options = { width: 600, height: 300, scale: 1 } ) {
-    this.elem = query(el)
+    this.el = query(el)
     this.options = options
     this.nodes = []
 
@@ -63,8 +63,8 @@ class Konvas {
   }
 
   private initStyle() {
-    this.elem.classList.add('konvas')
-    const elem = (this.elem as HTMLElement)
+    this.el.classList.add('konvas')
+    const elem = (this.el as HTMLElement)
     elem.style.position = 'relative'
     elem.style.transformOrigin = '0 0'
 
@@ -72,7 +72,7 @@ class Konvas {
   }
 
   public render() {
-    const elem = (this.elem as HTMLElement)
+    const elem = (this.el as HTMLElement)
     const width = this.width * this.scale
     const height = this.height * this.scale
 
@@ -86,7 +86,7 @@ class Konvas {
       this.nodes.push(node)
     } else {
       node = new Node(node)
-      this.elem.appendChild(node.el)
+      this.el.appendChild(node.el)
       this.nodes.push(node)
     }
   }
@@ -100,11 +100,11 @@ class Konvas {
   }
 
   get left() {
-    return this.elem.getBoundingClientRect().left
+    return this.el.getBoundingClientRect().left
   }
 
   get top() {
-    return this.elem.getBoundingClientRect().top
+    return this.el.getBoundingClientRect().top
   }
 
   get scale() {

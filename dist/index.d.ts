@@ -1,6 +1,6 @@
 import Node from './node';
 declare class Konvas {
-    elem: Element;
+    el: Element;
     private options;
     private dragger;
     nodes: Node[];

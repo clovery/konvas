@@ -13,7 +13,7 @@ class Node {
   constructor(data: any) {
     this.el = document.createElement('div')
 
-    this.id = String(++uid)
+    this.id = String(uid++)
     this.el.id = this.id
 
     this.el.classList.add('node')

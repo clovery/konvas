@@ -19,3 +19,8 @@ konvas.addNode({
   x, y, width, height, text
 })
 ```
+
+# todo list
+[ ] node resize
+[ ] node rotate
+[ ] node locked

@@ -1,4 +1,5 @@
 import Canvas from '../index'
+import isOut from './isOut'
 
 /**
  * Dragger
@@ -22,9 +23,9 @@ class Dragger {
   }
 
   private initEvent() {
-    this.canvas.elem.addEventListener('mousedown', this.onMouseDown, false)
-    this.canvas.elem.addEventListener('mouseup', this.onMouseUp, false)
-    this.canvas.elem.addEventListener('mouseleave', this.onMouseUp, false)
+    this.canvas.el.addEventListener('mousedown', this.onMouseDown, false)
+    this.canvas.el.addEventListener('mouseup', this.onMouseUp, false)
+    // this.canvas.elem.addEventListener('mouseleave', this.onMouseUp, false)
 
     document.documentElement.addEventListener('mousemove', this.onMouseMove, false)
     document.documentElement.addEventListener('mouseup', this.onMouseUp, false)
@@ -45,7 +46,6 @@ class Dragger {
           y: this.mouse.y - this.active.y
         }
       }
-
       this.opts.onStart(targetElem.id)
     }
   }
@@ -99,28 +99,3 @@ class Dragger {
 }
 
 export default Dragger
-
-function isOut(x: number, y: number, container: any, node: any): { x: number, y: number } {
-  let newX = x 
-  let newY = y
-  if (x <= 0) {
-    newX = 0
-  }
-
-  if (y <= 0) {
-    newY = 0
-  }
-
-  if (x + node.width >= container.width) {
-    newX = container.width - node.width
-  }
-
-  if (y + node.height >= container.height) {
-    newY = container.height - node.height
-  }
-
-  return {
-    x: newX >= 0 ? newX : -1,
-    y: newY >= 0 ? newY : -1
-  }
-}

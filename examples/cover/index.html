@@ -2,15 +2,39 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<style>
+  .konvas {
+    background-color: #dcdcdc;
+  }
+</style>
 </head>
 <body>
-<div id="konvas"></div>
+  <div class="cover-container">
+    <div id="konvas"></div>
+  </div>
 <script src="../../dist/konvas.js"></script>
 <script>
 const konvas = new Konvas('#konvas', {
   width: 2480,
-  height: 3508
+  height: 3508,
+  scale: 0.153
 })
+
+const styles = {
+  backgroundImage: 'url(https://o7diglftu.qnssl.com/media/upload/b2b9aeff99574bc7616ddaacb83029c13fab4df8)',
+  backgroundSize: 'contain'
+}
+
+function setBackground(elem, styles) {
+  if (styles.backgroundImage) {
+    elem.style.backgroundImage = styles.backgroundImage
+  }
+
+  if (styles.backgroundSize) {
+    elem.style.backgroundSize = styles.backgroundSize
+  }
+}
+setBackground(konvas.elem, styles)
 </script>
 </body>
 </html>

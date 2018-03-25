@@ -2,6 +2,16 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; }
+  .konvas {
+    background: #dcdcdc;
+    margin: 0 auto;
+  }
+  .node {
+    background: #069430;
+  }
+</style>
 </head>
 <body>
 <div id="konvas"></div>
@@ -9,7 +19,7 @@
 <script>
 const konvas = new Konvas('#konvas')
 konvas.addNode({
-  x: 0, y: 0, width: 100, height: 100, text: 'Text'
+  x: 0, y: 0, width: 60, height: 60, text: 'Text'
 })
 </script>
 </body>

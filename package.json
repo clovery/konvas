@@ -1,7 +1,7 @@
 {
   "name": "konvas",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/konvas.js",
   "license": "CC0-1.0",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon --watch 'src/**/*' -e ts,tsx --exec npm run build",

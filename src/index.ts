@@ -89,6 +89,7 @@ class Konvas {
       this.el.appendChild(node.el)
       this.nodes.push(node)
     }
+    return node
   }
 
   public getNode(node: Node | string): Node | null {
@@ -113,6 +114,8 @@ class Konvas {
 
   set scale(val: number) {
     this.layout.scale = val
+    this.nodes.forEach(node => node.scale = val)
+
     this.render()
   }
 

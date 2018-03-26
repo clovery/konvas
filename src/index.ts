@@ -148,14 +148,17 @@ class Konvas {
 function setStyle(el: Element, style: any) {
   const elem = el as HTMLElement
   if (style) {
-    const styles = []
+    // const styles = []
     for (const key in style) {
       if (key) {
-        styles.push(`${key}: ${style[key]};`)
+        setStyleProp(elem.style, key, style)
       }
     }
-    elem.setAttribute('style', styles.join(';'))
   }
+}
+
+function setStyleProp(elem: any, key: string, style: any) {
+  elem[key] = style[key]
 }
 
 export default Konvas

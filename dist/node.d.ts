@@ -7,6 +7,7 @@ declare class Node {
     id: string;
     x: number;
     y: number;
+    private wrapper;
     layout: {
         rotate: number;
     };
@@ -22,6 +23,7 @@ declare class Node {
     unlock(): void;
     move(x: number, y: number): void;
     render(): void;
+    wrap(el: HTMLElement): void;
     toJSON(): {
         x: number;
         y: number;

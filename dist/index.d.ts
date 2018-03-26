@@ -17,7 +17,7 @@ declare class Konvas {
     });
     private initStyle();
     render(): void;
-    addNode(node: Node | any): void;
+    addNode(node: Node | any): any;
     getNode(node: Node | string): Node | null;
     readonly left: number;
     readonly top: number;

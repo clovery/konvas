@@ -18,9 +18,13 @@
 <script src="../../dist/konvas.js"></script>
 <script>
 const konvas = new Konvas('#konvas')
-konvas.addNode({
+const node1 = konvas.addNode({
   x: 0, y: 0, width: 60, height: 60, text: 'Text'
 })
+const div = document.createElement('div')
+div.innerHTML = 'Text'
+node1.wrap(div)
+
 konvas.addNode({
   x: 80, y: 80, width: 60, height: 60, text: 'Text'
 })

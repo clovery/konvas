@@ -11,6 +11,7 @@ class Node {
   public id: string
   public x: number
   public y: number
+  private wrapper!: HTMLElement
   public layout: {
     rotate: number
   } 
@@ -88,7 +89,7 @@ class Node {
 
   set scale(val) {
     this.data.scale = val
-    this.draw()
+    this.render()
   }
 
   public lock() {
@@ -111,11 +112,24 @@ class Node {
 
   public render() {
     const el = this.el as HTMLElement
+    const x = this.x * this.scale
+    const y = this.y * this.scale
+    const width = this.width * this.scale
+    const height = this.height * this.scale
 
-    el.style.left = `${this.x}px`
-    el.style.top = `${this.y}px`
-    el.style.width = `${ this.width * this.scale }px`
-    el.style.height = `${ this.height * this.scale }px`
+    el.style.left = `${x}px`
+    el.style.top = `${y}px`
+    el.style.width = `${width}px`
+    el.style.height = `${height}px`
+  }
+
+  public wrap(el: HTMLElement) {
+    if (this.wrapper) {
+      // noop
+    } else {
+      this.el.appendChild(el)
+      this.wrapper = el
+    }
   }
 
   public toJSON() {

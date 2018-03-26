@@ -50,6 +50,13 @@ class Dragger {
   }
 
   private onMouseMove = (e: MouseEvent) => {
+    if (e.stopPropagation) {
+      e.stopPropagation()
+    }
+    if (e.preventDefault) {
+      e.preventDefault()
+    }
+
     let x = e.pageX - this.canvas.left
     let y = e.pageY - this.canvas.top
 

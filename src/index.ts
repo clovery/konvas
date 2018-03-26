@@ -139,6 +139,23 @@ class Konvas {
       nodes
     }
   }
+
+  public setStyle(styles: { string: string }) {
+    setStyle(this.el, styles)
+  }
+}
+
+function setStyle(el: Element, style: any) {
+  const elem = el as HTMLElement
+  if (style) {
+    const styles = []
+    for (const key in style) {
+      if (key) {
+        styles.push(`${key}: ${style[key]};`)
+      }
+    }
+    elem.setAttribute('style', styles.join(';'))
+  }
 }
 
 export default Konvas

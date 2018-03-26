@@ -36,5 +36,8 @@ declare class Konvas {
             scale: any;
         }[];
     };
+    setStyle(styles: {
+        string: string;
+    }): void;
 }
 export default Konvas;

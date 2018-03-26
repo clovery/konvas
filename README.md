@@ -10,6 +10,8 @@
 * y
 * width
 * height
+* scale
+* rotate
 
 ## 初始化
 
@@ -20,8 +22,22 @@ konvas.addNode({
 })
 ```
 
+## 基础组件
+
+提供基础功能
+
+* drag
+* scale
+* resize
+* rotate
+
+组件不关注展现。其他组件应该挂载到基础组件中。
+
+node.wrap()
+
 # todo list
 
 -  [ ] node resize
 -  [x] node rotate
 -  [x] node locked
+

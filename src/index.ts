@@ -1,6 +1,16 @@
 import { query } from './utils/dom'
-import Dragger from './dragger'
+import setStyle from './utils/setStyle'
+import Painter from './painters/index'
 import Node from './node'
+import Resizer from './resizer/index'
+
+import initEvent from './initEvent'
+import initResizer from './initResizer'
+import initDragger from './initDragger'
+
+function toString(t: any) {
+  return '' + t
+}
 
 /*
 interface IOptions {
@@ -8,58 +18,49 @@ interface IOptions {
   height?: number;
 }
 */
+const defaultOptions = {
+  width: 600, height: 300, scale: 1,
+  draggable: true
+}
 
 class Konvas {
   public el: Element
-  private options: any
-  private dragger: Dragger
+  public opts: any
   public nodes: Node[]
-  public activeNode: Node
+  public activeNode!: Node
+  private nodesMap: Map<string, Node>
   public layout: {
     width: number,
     height: number,
     scale: number
   } 
+  private renders: any
+  [key: string]: any
 
-  constructor(el: Element | string, options = { width: 600, height: 300, scale: 1 } ) {
+  constructor(el: Element | string, options = defaultOptions, renders: any) {
     this.el = query(el)
-    this.options = options
+    this.opts = Object.assign({}, defaultOptions, options)
     this.nodes = []
 
+    this.renders = renders
+    this.nodesMap = new Map()
+
     this.layout = {
-      width: options.width,
-      height: options.height,
-      scale: options.scale || 1
+      width: this.opts.width,
+      height: this.opts.height,
+      scale: this.opts.scale
     }
 
-    /*
-    Object.defineProperty(this, 'scale', {
-      set(val: number) {
-        this.layout.scale = val
-      },
-      get(): any {
-        return this.layout.scale
-      }
-    }) */
+    if (this.opts.draggable) {
+      initDragger(this)
+      initResizer(this)
+    }
 
-    this.dragger = new Dragger(this, {
-      onStart: (id: string) => {
-        const node = this.getNode(id)
-        if (node) {
-          this.activeNode = node
-        }
-        // this.resizeable.hide()
-      },
-      onMove: (id: string, { x, y }) => {
-        this.activeNode.move(x, y)
-      },
-      onStop: (id: string) => {
-        // console.log(id)
-        // this.emit('drag.end', id, { x, y })
-        // this.resizeable.move(x, y)
-      }
-    })
+    initEvent(this)
     this.initStyle()
+    if (this.opts.nodes) {
+      this.opts.nodes.forEach((node: any) => this.addNode(node))
+    }
   }
 
   private initStyle() {
@@ -73,10 +74,10 @@ class Konvas {
 
   public render() {
     const elem = (this.el as HTMLElement)
-    const width = this.width * this.scale
-    const height = this.height * this.scale
+    const width = this.width * this.getScale()
+    const height = this.height * this.getScale()
 
-    elem.setAttribute('data-scale', String(this.scale))
+    elem.setAttribute('data-scale', String(this.getScale()))
     elem.style.width = `${width}px`
     elem.style.height = `${height}px`
   }
@@ -85,11 +86,22 @@ class Konvas {
     if (node instanceof Node) {
       this.nodes.push(node)
     } else {
-      node = new Node(node)
+      node = new Node(node, {
+        render: (this.renders && this.renders[node.type]) || Painter.get(node.type),
+        scale: this.layout.scale
+      })
       this.el.appendChild(node.el)
       this.nodes.push(node)
     }
+
+    this.nodesMap.set(node.id, node)
+
     return node
+  }
+
+  public select(id: string): Node | null {
+    id = toString(id)
+    return this.nodesMap.get(id) || null
   }
 
   public getNode(node: Node | string): Node | null {
@@ -108,14 +120,17 @@ class Konvas {
     return this.el.getBoundingClientRect().top
   }
 
-  get scale() {
+  public scale(num: number) {
+    return num ? this.setScale(num) : this.getScale()
+  }
+
+  public getScale() {
     return this.layout.scale
   }
 
-  set scale(val: number) {
-    this.layout.scale = val
-    this.nodes.forEach(node => node.scale = val)
-
+  public setScale(num: number) {
+    this.layout.scale = num
+    this.nodes.forEach(node => node.scale(num))
     this.render()
   }
 
@@ -143,22 +158,10 @@ class Konvas {
   public setStyle(styles: { string: string }) {
     setStyle(this.el, styles)
   }
-}
 
-function setStyle(el: Element, style: any) {
-  const elem = el as HTMLElement
-  if (style) {
-    // const styles = []
-    for (const key in style) {
-      if (key) {
-        setStyleProp(elem.style, key, style)
-      }
-    }
+  public zoom(num: number) {
+    console.log(num)
   }
-}
-
-function setStyleProp(elem: any, key: string, style: any) {
-  elem[key] = style[key]
 }
 
 export default Konvas

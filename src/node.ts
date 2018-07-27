@@ -1,4 +1,4 @@
-import { isbool } from './utils'
+import { isBool } from './utils/index'
 
 let uid: number = 1
 
@@ -12,22 +12,24 @@ class Node {
   public x: number
   public y: number
   private wrapper!: HTMLElement
-  public layout: {
-    rotate: number
-  } 
+  public layout: Map<string, any>
+  private opts: any
+  private painter: any
 
   public isDraggable: boolean
   public islocked: boolean
 
-  constructor(data: any) {
+  constructor(data: any, opts: any) {
     this.el = document.createElement('div')
+    this.opts = opts
 
     this.id = String(uid++)
     this.el.id = this.id
 
     this.el.classList.add('node')
+    this.el.setAttribute('data-type', 'node')
 
-    this.isDraggable = isbool(data.draggable) ? data.draggable : true
+    this.isDraggable = isBool(data.draggable) ? data.draggable : true
 
     this.islocked = false
     this.data = { ...data }
@@ -35,9 +37,12 @@ class Node {
     this.x = this.data.x || 0
     this.y = this.data.y || 0
 
-    this.layout = {
-      rotate: 0
-    }
+    this.layout = new Map()
+    this.layout.set('x', this.x)
+    this.layout.set('y', this.y)
+    this.layout.set('rotate', 0)
+    this.layout.set('scale', this.opts.scale)
+    
     this.initStyle()
     this.render()
   }
@@ -58,7 +63,7 @@ class Node {
   */
 
   get width() {
-    return this.data.width
+    return this.data.width || this.data.w
   }
 
   set width(val) {
@@ -66,13 +71,40 @@ class Node {
   }
 
   get height() {
-    return this.data.height
+    return this.data.height || this.data.h
   }
 
   set height(val: number) {
     this.data.height = val
   }
 
+  public rotate(deg: number) {
+    this.layout.set('rotate', deg)
+    const el = this.el as HTMLElement
+    el.style.transform = `rotate(${deg}deg)`
+    return this
+  }
+
+  public scale(val: number) {
+    this.layout.set('scale', val)
+    this.render()
+  }
+
+  public getScale() {
+    return this.layout.get('scale')
+  }
+
+  /*
+  get scale() {
+    return this.data.scale || 1
+  }
+
+  set scale(val) {
+    this.data.scale = val
+    this.render()
+  }
+  */
+  /*
   set rotate(deg: number) {
     this.layout.rotate = deg
     const el = this.el as HTMLElement
@@ -82,15 +114,7 @@ class Node {
   get rotate() {
     return this.layout.rotate
   }
-
-  get scale() {
-    return this.data.scale || 1
-  }
-
-  set scale(val) {
-    this.data.scale = val
-    this.render()
-  }
+  */
 
   public lock() {
     this.islocked = true
@@ -105,22 +129,49 @@ class Node {
   public move(x: number, y: number) {
     this.x = x
     this.y = y
+
     const el = this.el as HTMLElement
     el.style.left = `${x}px`
     el.style.top = `${y}px`
+
+    const scale = this.layout.get('scale')
+    this.layout.set('x', this.x / scale)
+    this.layout.set('y', this.y / scale)
+
+    return this
+  }
+
+  public get(type: string) {
+    return this.layout.get(type)
   }
 
   public render() {
     const el = this.el as HTMLElement
-    const x = this.x * this.scale
-    const y = this.y * this.scale
-    const width = this.width * this.scale
-    const height = this.height * this.scale
+    const scale = this.layout.get('scale')
+
+    const x = this.layout.get('x') * scale
+    const y = this.layout.get('y') * scale
+    const width = this.width * scale
+    const height = this.height * scale
 
     el.style.left = `${x}px`
     el.style.top = `${y}px`
     el.style.width = `${width}px`
     el.style.height = `${height}px`
+
+    if (this.painter) {
+      this.painter.paint({ x, y, w: width, h: height })
+    } else {
+      if (this.opts.render) {
+        const painter = new this.opts.render(this, this.data)
+        this.painter = painter
+        this.painter.paint({ x, y, w: width, h: height })
+        this.wrap(this.painter.el)
+      }
+    }
+    this.x = x
+    this.y = y
+    console.log(`节点在画布中的位置 x: ${this.x}, y: ${this.y}`)
   }
 
   public wrap(el: HTMLElement) {

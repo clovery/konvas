@@ -10,11 +10,11 @@ export default function isOut(x: number, y: number, container: any, node: any): 
   }
 
   if (x + node.width >= container.width) {
-    newX = container.width - node.width
+    newX = (container.width - node.width) * container.getScale()
   }
 
   if (y + node.height >= container.height) {
-    newY = container.height - node.height
+    newY = (container.height - node.height) * container.getScale()
   }
 
   return {

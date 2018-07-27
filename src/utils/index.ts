@@ -1,3 +1,3 @@
-export function isbool(val: any): boolean {
+export function isBool(val: any): boolean {
   return typeof val === 'boolean'
 }

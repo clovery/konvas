@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8" />
 <style>
-  .konvas {
-    background-color: #dcdcdc;
+  #konvas {
+    border: 4px solid #dcdcdc;
   }
 </style>
 </head>
@@ -14,27 +14,65 @@
   </div>
 <script src="../../dist/konvas.js"></script>
 <script>
-const konvas = new Konvas('#konvas', {
-  width: 2480,
-  height: 3508,
-  scale: 0.153
-})
-
-const styles = {
-  backgroundImage: 'url(https://o7diglftu.qnssl.com/media/upload/b2b9aeff99574bc7616ddaacb83029c13fab4df8)',
-  backgroundSize: 'contain'
-}
-
-function setBackground(elem, styles) {
-  if (styles.backgroundImage) {
-    elem.style.backgroundImage = styles.backgroundImage
+  // const config = {"name":"cover-22","alias":null,"parent":null,"type":"cover","format":"jpeg","width":2480,"height":3508,"layers":[{"name":"background","backgroundColor":"#ffffff","content":"http://o7diglftu.qnssl.com/media/upload/FqPf9L_NcjjOJlKe8l860XwGRbrh","x":0,"y":0,"w":2480,"h":3508,"mode":0,"shape":"square","type":"image","locked":true},{"type":"image","content":"https://static.xinshu.me/assets/images/covers/gallery/9.jpg","x":"1550","y":0,"locked":false,"note":"","w":930,"h":"3508","shape":"square","mode":"0","name":"pic","ignoreError":false},{"type":"text","content":"那些年的朋友圈","x":1200,"y":3330,"locked":false,"note":"","name":"title","fontSize":144,"fillStyle":"#000000","fontFamily":"STZhongsong","textAlign":"right","orientation":1,"fontStyle":"Regular","textWidth":3200,"spacing":1},{"type":"text","content":"心小书·作品","x":1075,"y":3320,"locked":false,"note":"","name":"author","fontSize":70,"fillStyle":"#000000","fontFamily":"SongtiSC","textAlign":"right","orientation":1,"fontStyle":"Regular","spacing":1}]}
+  const config = {
+    "name": "cover-psb-8",
+    "alias": "",
+    "parent": null,
+    "type": "cover-psb",
+    "format": "jpeg",
+    "width": 2480,
+    "height": 3508,
+    "layers": [{
+      "name": "background",
+      "backgroundColor": "#ffffff",
+      "content": "http://o7diglftu.qnssl.com/media/upload/Fi0r4jfCZqzl1snpZplF6K-SO8hz",
+      "x": 0,
+      "y": 0,
+      "w": 2480,
+      "h": 3508,
+      "mode": 0,
+      "shape": "square",
+      "type": "image"
+    }, {
+      "type": "text",
+      "content": "旅行的意义",
+      "x": 1930,
+      "y": 355,
+      "locked": false,
+      "note": "",
+      "name": "title",
+      "fontSize": 144,
+      "fillStyle": "#000000",
+      "fontFamily": "PingFangSC",
+      "textAlign": "left",
+      "orientation": 1,
+      "fontStyle": "Regular",
+      "textWidth": 1600,
+      "spacing": 1,
+      "w": 144
+    }, {
+      "type": "text",
+      "content": "心小书  作品",
+      "x": 1766,
+      "y": 354,
+      "locked": false,
+      "note": "",
+      "name": "author",
+      "fontSize": 72,
+      "fillStyle": "#000000",
+      "fontFamily": "PingFangSC",
+      "textAlign": "left",
+      "orientation": 1,
+      "textWidth": 1400,
+      "fontStyle": "Regular",
+      "spacing": 1,
+      "w": 72
+    }]
   }
-
-  if (styles.backgroundSize) {
-    elem.style.backgroundSize = styles.backgroundSize
-  }
-}
-setBackground(konvas.el, styles)
+  config.nodes = config.layers
+  config.scale = 0.5
+  const konvas = new Konvas('#konvas', config)
 </script>
 </body>
 </html>

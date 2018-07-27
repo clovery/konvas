@@ -1,5 +1,6 @@
 import Canvas from '../index'
-import isOut from './isOut'
+// import isOut from './isOut'
+import getNodeDOM from '../utils/getNodeDOM'
 
 /**
  * Dragger
@@ -9,7 +10,7 @@ class Dragger {
   private opts: { onStart: any, onStop: any, onMove: any }
   private active: any
   private dragging: any
-  private mouse: any
+  public mouse: any
   private startPoint: any
   private x: number | null
   private y: number | null
@@ -32,21 +33,40 @@ class Dragger {
   }
 
   private onMouseDown = (e: Event) => {
+    const evt = e as MouseEvent
     const { target } = e
-    const targetElem = target as HTMLElement
-    this.active = this.canvas.getNode(targetElem.id)
+    const targetElem = target as (HTMLElement | null)
+    let elem = targetElem
+
+    if (targetElem && !targetElem.id) {
+      elem = getNodeDOM(targetElem)
+    }
+
+    if (elem) {
+      this.active = this.canvas.getNode(elem.id)
+    }
 
     if (this.active && this.active.isDraggable) {
       this.dragging = true
 
-      if (this.mouse && this.active) {
-        this.startPoint = {
-          x: this.mouse.x - this.active.x,
-          y: this.mouse.y - this.active.y
-        }
+      // 获取节点拖拽开始时，鼠标位置与节点边界的偏移值
+      const { pageX, pageY } = evt
+      const canvasX = this.canvas.left
+      const canvasY = this.canvas.top
+      const nodeX = this.active.x
+      const nodeY = this.active.y
+
+      const offsetX = pageX - canvasX - nodeX
+      const offsetY = pageY - canvasY - nodeY
+
+      this.startPoint = { x: offsetX, y: offsetY }
+
+      if (this.opts.onStart && targetElem) {
+        this.opts.onStart(targetElem.id)
       }
-      this.opts.onStart(targetElem.id)
     }
+
+    return e
   }
 
   private onMouseMove = (e: MouseEvent) => {
@@ -59,25 +79,35 @@ class Dragger {
 
     let x = e.pageX - this.canvas.left
     let y = e.pageY - this.canvas.top
+    // const scale = this.canvas.getScale()
 
-    x = x / this.canvas.scale
-    y = y / this.canvas.scale
+    const { pageX, pageY } = e
+    const canvasX = this.canvas.left
+    const canvasY = this.canvas.top
+    // 鼠标在画布中的位置
+    // pageX - canvasX
+    // pageY - canvasY
+    // 画布中鼠标位置
+    const mouseX = pageX - canvasX
+    const mouseY = pageY - canvasY
 
-    this.mouse = { x, y }
+    this.mouse = { x: mouseX, y: mouseY }
 
     if (this.dragging && this.active) {
       x = x - this.startPoint.x
-      const xStr = String(Math.round(x))
-      const yStr = String(Math.round(y - this.startPoint.y))
-      x = parseInt(xStr, 10)
-      y = parseInt(yStr, 10)
+      y = y - this.startPoint.y
+      x = parseInt(String(Math.round(x)), 10)
+      y = parseInt(String(Math.round(y)), 10)
 
+      /*
       const isout = isOut(x, y, this.canvas, this.active)
       if (isout.x >= 0 || isout.y >= 0) {
         x = isout.x
         y = isout.y
       }
-      this.opts.onMove(this.active.id, { x, y })
+      */
+
+      this.opts.onMove({ x, y }, this.active.id)
       this.x = x
       this.y = y
     }
@@ -93,7 +123,9 @@ class Dragger {
       if (id) {
         if (typeof this.x !== 'undefined'
           && typeof this.y !== 'undefined') {
-          this.opts.onStop(id, { x: this.x, y: this.y })
+          if (this.opts.onStop) {
+            this.opts.onStop(id, { x: this.x, y: this.y })
+          }
         }
 
         this.x = null

@@ -2,6 +2,11 @@
 
 自定义画布
 
+## 模块
+
+* Dragger
+* Guide Line
+
 ## Node
 
 ### 属性

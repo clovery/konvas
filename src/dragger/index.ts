@@ -1,7 +1,7 @@
 import Konvas from '../index'
 import getNodeDOM from '../utils/getNodeDOM'
 import EventEmitter from '../utils/eventeimtter'
-import getVirtualPoint from './getVirtualPoint'
+import getVirtualPoint, { IPoint } from './getVirtualPoint'
 
 /**
  * 坐标点以画布中的虚拟坐标点为准
@@ -28,6 +28,10 @@ class Dragger  {
   private y: number | null
   public el: HTMLElement
   private ee: any
+  private lastVirtualPoint!: IPoint
+  public konvasPoint!: IPoint 
+  public activePoint!: IPoint 
+  private selectors: any
 
   constructor(canvas: Konvas, opts: any) {
     this.canvas = canvas
@@ -38,6 +42,7 @@ class Dragger  {
     this.el = document.createElement('div')
     this.el.style.position = 'absolute'
     canvas.el.appendChild(this.el)
+    this.selectors = {}
 
     this.el.style.zIndex = '2222'
     this.el.style.background = '#687d6e'
@@ -52,21 +57,37 @@ class Dragger  {
     document.documentElement.addEventListener('mouseup', this.onMouseUp, false)
   }
 
+  public addSelector(selector: string, opts?: any) {
+    this.selectors[selector] = opts 
+  }
+
+  private getMatchSelector(elem: HTMLElement) {
+    for (const selector in this.selectors) {
+      if (selector) {
+        const match = getNodeDOM(elem, selector)
+        if (match) {
+          return match
+        }
+      }
+    }
+  }
+
   private onMouseDown = (e: Event) => {
     const evt = e as MouseEvent
-    const { target } = e
-    const targetElem = target as (HTMLElement | null)
-    let elem = targetElem
+    const target = evt.target as HTMLElement
+    const elem = getNodeDOM(target, '[data-type="node"]')
+    const resizerNode = getNodeDOM(target, '[data-type="resizer"]')
 
-    if (targetElem && !targetElem.id) {
-      elem = getNodeDOM(targetElem)
-    }
+    const match = this.getMatchSelector(target)
 
     if (elem) {
       this.active = this.canvas.getNode(elem.id)
     }
+    if (resizerNode) {
+      this.active = this.canvas.resizer
+    }
 
-    if (this.active && this.active.isDraggable) {
+    if (this.active) {
       this.dragging = true
 
       const evtPoint = {
@@ -79,8 +100,8 @@ class Dragger  {
 
       this.offsetPoint = offsetPoint
 
-      if (targetElem) {
-        this.ee.emit('start', targetElem.id)
+      if (this.active) {
+        this.ee.emit('start', this.active.id)
       }
     }
 
@@ -94,17 +115,19 @@ class Dragger  {
     if (evt.preventDefault) {
       evt.preventDefault()
     }
+    const scale = this.canvas.getScale()
+    const evtPoint = { x: evt.pageX, y: evt.pageY }
+    const konvasOffset = getKonvasOffset(this.canvas)
+    const konvasPoint = getVirtualPoint(evtPoint, konvasOffset, scale)
+    const virtual = getVirtualPoint(evtPoint, konvasOffset, scale, this.offsetPoint)
+    this.konvasPoint = konvasPoint
+    this.activePoint = konvasPoint
 
     if (this.dragging && this.active) {
-      const scale = this.canvas.getScale()
-      const evtPoint = { x: evt.pageX, y: evt.pageY }
-      const konvasOffset = getKonvasOffset(this.canvas)
-      const virtual = getVirtualPoint(evtPoint, konvasOffset, scale, this.offsetPoint)
-
       this.el.style.left = `${virtual.x * scale}px`
       this.el.style.top = `${(virtual.y + this.active.h) * scale}px`
       this.el.textContent = `x: ${virtual.x} y: ${virtual.y}`
-
+      this.lastVirtualPoint = virtual
       this.ee.emit('move', { ...virtual })
     }
   }
@@ -123,10 +146,12 @@ class Dragger  {
             this.opts.onStop(id, { x: this.x, y: this.y })
           }
         }
-
         this.x = null
         this.y = null
         this.active = null
+      }
+      if (this.lastVirtualPoint) {
+        this.ee.emit('stop', this.lastVirtualPoint)
       }
     }
   }

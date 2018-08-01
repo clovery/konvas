@@ -19,6 +19,14 @@ export default function(konvas: Konvas, options: object) {
     }
   })
 
+  dragger.addSelector('[data-type="resizer-cursor"]')
+  dragger.addSelector('[data-type="node"]', {
+    onBeforeStart() {
+      console.log(0)
+    }
+  })
+  dragger.addSelector('[data-type="resizer"]')
+
   // align: left, center, right
   // vertical: top, middle, bottom
 

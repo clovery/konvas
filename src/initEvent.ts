@@ -17,11 +17,14 @@ export default function initEvent(konvas: Konvas) {
     }
   })
 
-  konvas.el.addEventListener('click', (evt: Event) => {
+  const selectNodeHandler = (evt: Event) => {
     const target = evt.target as HTMLElement
-    const el = getNodeDOM(target)
+    const el = getNodeDOM(target, '[data-type="node"]')
     if (el) {
       konvas.selectNode(el.id)
     }
-  }, false)
+  }
+
+  konvas.el.addEventListener('click', selectNodeHandler, false)
+  konvas.el.addEventListener('mouseDown', selectNodeHandler, false)
 }

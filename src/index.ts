@@ -45,8 +45,8 @@ class Konvas {
     scale: number
   } 
   private renders: any
-  public resizer: Resizer | null
-  public dragger: Dragger | null
+  public resizer!: Resizer
+  public dragger!: Dragger
   [key: string]: any
 
   constructor(el: Element | string, options = defaultOptions, renders: any) {
@@ -58,8 +58,6 @@ class Konvas {
     this.nodesMap = new Map()
 
     this.activeNode = null
-    this.resizer = null
-    this.dragger = null
 
     this.layout = {
       width: this.opts.width,
@@ -69,7 +67,7 @@ class Konvas {
 
     initDragger(this, this.opts.dragger)
 
-    initResizer(this, this.opts.resizer)
+    initResizer(this, { ...this.opts.resizer, scale: this.layout.scale })
 
     initGrid(this)
 
@@ -132,11 +130,11 @@ class Konvas {
   }
 
   get left() {
-    return this.el.getBoundingClientRect().left
+    return this.el.getBoundingClientRect().left + document.documentElement.scrollLeft
   }
 
   get top() {
-    return this.el.getBoundingClientRect().top
+    return this.el.getBoundingClientRect().top - document.documentElement.scrollTop
   }
 
   public scale(num: number) {

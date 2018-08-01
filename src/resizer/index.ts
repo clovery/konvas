@@ -28,6 +28,7 @@ class Resizeable {
   public dragging: any
   public onMove: any
   public _scale: any
+  private activated: boolean
   [key: string]: any
 
   constructor(el?: any, options?: any) {
@@ -43,11 +44,17 @@ class Resizeable {
 
     this.el = el
     this.el.classList.add('resizer')
+    this.el.setAttribute('data-type', 'resizer')
     this.options = options
+    this.opts = options
     this.controls = {}
 
     if (options.dragger) {
       this.dragger = options.dragger
+    }
+
+    if (this.opts.scale) {
+      this.layout.scale = this.options.scale
     }
 
     Cursors.forEach(this.createCursor.bind(this))
@@ -68,9 +75,14 @@ class Resizeable {
     })
     this.el.appendChild(border)
 
-    this.hide()
+    this.activated = true
 
+    this.hide()
     initEvent(this)
+  }
+
+  get isActive() {
+    return this.activated
   }
 
   createCursor(type: string) {
@@ -81,11 +93,17 @@ class Resizeable {
   }
 
   hide() {
-    this.el.style.display = 'none'
+    if (this.isActive) {
+      this.el.style.display = 'none'
+      this.activated = false
+    }
   }
 
   show() {
-    this.el.style.display = 'block'
+    if (!this.isActive) {
+      this.el.style.display = 'block'
+      this.activated = true
+    }
   }
 
   setCursor(type: string, x: number, y: number) {
@@ -224,6 +242,7 @@ class Resizeable {
   get x() {
     return this.layout.x
   }
+
   onStop() {
     this._x = this.x
     this._y = this.y
@@ -240,6 +259,8 @@ class Resizeable {
 
     this.update({ x, y, w, h, scale })
     this.show()
+
+    this.activated = true
   }
 
   // 更新位置信息
@@ -290,15 +311,26 @@ class Resizeable {
     this.update()
   }
 
-  /**
-   *
-   */
-  move(x: any, y: any) {
-    this.update({ x, y})
+  // 移动
+  move(x: number, y: number) {
+    const left = x * this.scale
+    const top = y * this.scale
+
+    this.x = x
+    this.y = y
+
+    this.el.style.left = `${left}px`
+    this.el.style.top = `${top}px`
+
+    return this
   }
 
-  set scale(val: any) {
-    this._scale = val
+  get scale() {
+    return this.layout.scale
+  }
+
+  set scale(val: number) {
+    this.layout.scale = val
     this.draw()
   }
 }

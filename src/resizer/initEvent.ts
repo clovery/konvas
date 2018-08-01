@@ -1,17 +1,19 @@
-import extend from '../utils/extend'
 import Resizer from './index'
+import extend from '../utils/extend'
 import parent from '../utils/parent'
 
 export default function(resizer: Resizer) {
   extend(resizer, {
     initEvent() {
+      /*
       this.el.addEventListener('click', (e: MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
         return false
       }, false)
+      */
 
-      this.el.addEventListener('mousedown', this.handleMouseDown.bind(this), false)
+      // this.el.addEventListener('mousedown', this.handleMouseDown.bind(this), false)
       document.documentElement.addEventListener('mousemove', this.handleMove.bind(this), false)
       document.documentElement.addEventListener('mouseup', this.handleDocMouseDown.bind(this), false)
     },
@@ -20,6 +22,12 @@ export default function(resizer: Resizer) {
       event.preventDefault()
       event.stopPropagation()
 
+      if (this.isActive) {
+        if (this.dragger) {
+          // console.log(this.dragger.activePoint)
+        }
+      }
+      /*
       const mouse = this.dragger.mouse
       if (mouse && this.dragging && this.startPoint) {
         let { x, y } = mouse
@@ -35,6 +43,7 @@ export default function(resizer: Resizer) {
           }
         }
       }
+      */
     },
 
     handleMouseDown(e: MouseEvent) {
@@ -55,9 +64,11 @@ export default function(resizer: Resizer) {
 
       const mouse = this.dragger.mouse
 
-      this.startPoint = {
-        x: mouse.x - this.x,
-        y: mouse.y - this.y
+      if (mouse) {
+        this.startPoint = {
+          x: mouse.x - this.x,
+          y: mouse.y - this.y
+        }
       }
       this.dragging = true
     },

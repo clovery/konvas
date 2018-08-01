@@ -1,7 +1,7 @@
 import parents from './parents'
 
-export default function(elem: HTMLElement | null): HTMLElement | null {
-  const el = parents(elem, '[data-type="node"]')
+export default function(elem: HTMLElement | null, selector: string): HTMLElement | null {
+  const el = parents(elem, selector)
   if (el.length) {
     return el[0]
   }

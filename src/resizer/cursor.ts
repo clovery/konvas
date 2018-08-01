@@ -15,7 +15,8 @@ class Cursor {
     this.x = 0
     this.y = 0
 
-    this.el.dataset.type = this.type
+    this.el.dataset.cursorType = this.type
+    this.el.dataset.type = 'resizer-cursor'
     this.initStyle()
   }
 

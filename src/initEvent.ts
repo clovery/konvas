@@ -10,7 +10,10 @@ export default function initEvent(konvas: Konvas) {
         this.activeNode = node
         this.node = node
       }
-      this.resizer.active(this.activeNode)
+
+      if (this.resizer) {
+        this.resizer.active(this.activeNode)
+      }
     }
   })
 

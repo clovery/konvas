@@ -47,14 +47,18 @@ class Cursor {
       right: 0,
       bottom: 0,
       left: 0,
-      border: '1px solid #dcdcdc'
+      background: '#fff',
+      border: '1px solid #616097'
     })
     this.el.appendChild(border)
   }
 
   public set(x: number, y: number) {
-    this.x = x - 4
-    this.y = y - 4
+    this.x = x
+    this.y = y
+
+    this.el.style.left = this.x + 'px'
+    this.el.style.top = this.y + 'px'
   }
 }
 

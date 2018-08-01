@@ -9,10 +9,10 @@ class Node {
   private el: Element
   private data: any
   public id: string
-  public x: number
-  public y: number
+  public left: number
+  public top: number
   private wrapper!: HTMLElement
-  public layout: Map<string, any>
+  public layout: any
   private opts: any
   private painter: any
 
@@ -34,14 +34,17 @@ class Node {
     this.islocked = false
     this.data = { ...data }
 
-    this.x = this.data.x || 0
-    this.y = this.data.y || 0
+    this.left = this.data.x || 0
+    this.top = this.data.y || 0
 
-    this.layout = new Map()
-    this.layout.set('x', this.x)
-    this.layout.set('y', this.y)
-    this.layout.set('rotate', 0)
-    this.layout.set('scale', this.opts.scale)
+    this.layout = {
+      w: data.width,
+      h: data.height,
+      x: this.left,
+      y: this.top,
+      rotate: 0,
+      scale: this.opts.scale
+    }
     
     this.initStyle()
     this.render()
@@ -52,16 +55,27 @@ class Node {
     el.style.position = 'absolute'
   }
 
-  /*
   get x(): number {
-    return 0
+    return this.layout.x
   }
 
   get y(): number {
-    return 0
+    return this.layout.y
   }
-  */
 
+  get w(): number {
+    return this.layout.w
+  }
+
+  get h(): number {
+    return this.layout.h
+  }
+
+  get scale() {
+    return this.layout.scale
+  }
+
+  /*
   get width() {
     return this.data.width || this.data.w
   }
@@ -77,23 +91,23 @@ class Node {
   set height(val: number) {
     this.data.height = val
   }
+  */
 
   public rotate(deg: number) {
-    this.layout.set('rotate', deg)
+    this.layout.rotate = deg
     const el = this.el as HTMLElement
     el.style.transform = `rotate(${deg}deg)`
     return this
   }
 
-  public scale(val: number) {
-    this.layout.set('scale', val)
+  public setScale(val: number) {
+    this.layout.scale = val
     this.render()
   }
 
   public getScale() {
-    return this.layout.get('scale')
+    return this.layout.scale
   }
-
   /*
   get scale() {
     return this.data.scale || 1
@@ -127,32 +141,30 @@ class Node {
   }
 
   public move(x: number, y: number) {
-    this.x = x
-    this.y = y
+    this.layout.x = x
+    this.layout.y = y
 
     const el = this.el as HTMLElement
-    el.style.left = `${x}px`
-    el.style.top = `${y}px`
+    const scale = this.layout.scale
 
-    const scale = this.layout.get('scale')
-    this.layout.set('x', this.x / scale)
-    this.layout.set('y', this.y / scale)
+    el.style.left = `${ x * scale }px`
+    el.style.top = `${ y * scale }px`
 
     return this
   }
 
   public get(type: string) {
-    return this.layout.get(type)
+    return this.layout[type]
   }
 
   public render() {
     const el = this.el as HTMLElement
-    const scale = this.layout.get('scale')
+    const scale = this.layout.scale
 
-    const x = this.layout.get('x') * scale
-    const y = this.layout.get('y') * scale
-    const width = this.width * scale
-    const height = this.height * scale
+    const x = this.x * scale
+    const y = this.y * scale
+    const width = this.w * scale
+    const height = this.h * scale
 
     el.style.left = `${x}px`
     el.style.top = `${y}px`
@@ -169,9 +181,9 @@ class Node {
         this.wrap(this.painter.el)
       }
     }
-    this.x = x
-    this.y = y
-    console.log(`节点在画布中的位置 x: ${this.x}, y: ${this.y}`)
+    this.left = x
+    this.top = y
+    console.log(`节点在画布中的位置 x: ${this.left}, y: ${this.top}`)
   }
 
   public wrap(el: HTMLElement) {
@@ -185,10 +197,10 @@ class Node {
 
   public toJSON() {
     return {
-      x: this.x,
-      y: this.y,
-      width: this.width,
-      height: this.height,
+      x: this.left,
+      y: this.top,
+      width: this.w,
+      height: this.h,
       scale: this.scale
     }
   }

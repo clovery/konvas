@@ -1,5 +1,6 @@
 import extend from '../utils/extend'
 import Resizer from './index'
+import parent from '../utils/parent'
 
 export default function(resizer: Resizer) {
   extend(resizer, {
@@ -10,61 +11,18 @@ export default function(resizer: Resizer) {
         return false
       }, false)
 
-      this.el.addEventListener('mousedown', (e: MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        const elem = e.target as HTMLElement
-
-        if (elem.classList.contains('cursor')) {
-          this.direction = elem.dataset.type
-          this.start = {
-            width: this.width,
-            height: this.height,
-            x: this.x,
-            y: this.y
-          }
-
-        }
-
-        const mouse = this.dragger.mouse
-
-        this.startPoint = {
-          x: mouse.x - this.x,
-          y: mouse.y - this.y
-        }
-        this.dragging = true
-
-      }, false)
-
+      this.el.addEventListener('mousedown', this.handleMouseDown.bind(this), false)
       document.documentElement.addEventListener('mousemove', this.handleMove.bind(this), false)
-
-      document.documentElement.addEventListener('mouseup', (e) => {
-        if (this.dragging) {
-          this.dragging = false
-          this.direction = false
-
-          if (this.onEnd) {
-            this.onEnd({
-              x: this.x,
-              y: this.y,
-              width: this.width,
-              height: this.height
-            })
-          }
-        }
-        e.preventDefault()
-        e.stopPropagation()
-      }, false)
+      document.documentElement.addEventListener('mouseup', this.handleDocMouseDown.bind(this), false)
     },
 
     handleMove(event: MouseEvent) {
       event.preventDefault()
       event.stopPropagation()
-      const mouse = this.dragger.mouse
-      let {x, y} = mouse
 
-      if (this.dragging && this.startPoint) {
+      const mouse = this.dragger.mouse
+      if (mouse && this.dragging && this.startPoint) {
+        let { x, y } = mouse
 
         if (this.direction) {
           this.setCursor(this.direction, x, y)
@@ -77,6 +35,51 @@ export default function(resizer: Resizer) {
           }
         }
       }
+    },
+
+    handleMouseDown(e: MouseEvent) {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const elem = parent(e.target as HTMLElement, '.cursor')
+
+      if (elem) {
+        this.direction = elem.dataset.type
+        this.start = {
+          w: this.w,
+          h: this.h,
+          x: this.x,
+          y: this.y
+        }
+      }
+
+      const mouse = this.dragger.mouse
+
+      this.startPoint = {
+        x: mouse.x - this.x,
+        y: mouse.y - this.y
+      }
+      this.dragging = true
+    },
+
+    handleDocMouseDown(e: MouseEvent) {
+      if (this.dragging) {
+        this.dragging = false
+        this.direction = false
+
+        if (this.onEnd) {
+          this.onEnd({
+            x: this.x,
+            y: this.y,
+            w: this.w,
+            h: this.h
+          })
+        }
+      }
+      e.preventDefault()
+      e.stopPropagation()
     }
   })
+
+  resizer.initEvent()
 }

@@ -2,11 +2,14 @@ import { query } from './utils/dom'
 import setStyle from './utils/setStyle'
 import Painter from './painters/index'
 import Node from './node'
+
+import Dragger from './dragger/index'
 import Resizer from './resizer/index'
 
 import initEvent from './initEvent'
 import initResizer from './initResizer'
 import initDragger from './initDragger'
+import initGrid from './initGrid'
 
 function toString(t: any) {
   return '' + t
@@ -19,15 +22,22 @@ interface IOptions {
 }
 */
 const defaultOptions = {
-  width: 600, height: 300, scale: 1,
-  draggable: true
+  width: 600, height: 300,
+  scale: 1,
+  resizer: {
+    enable: true
+  },
+  dragger: {
+    enable: true,
+    boundaryRestrict: true // 限制边界
+  }
 }
 
 class Konvas {
   public el: Element
   public opts: any
   public nodes: Node[]
-  public activeNode!: Node
+  public activeNode: Node | null
   private nodesMap: Map<string, Node>
   public layout: {
     width: number,
@@ -35,6 +45,8 @@ class Konvas {
     scale: number
   } 
   private renders: any
+  public resizer: Resizer | null
+  public dragger: Dragger | null
   [key: string]: any
 
   constructor(el: Element | string, options = defaultOptions, renders: any) {
@@ -45,22 +57,29 @@ class Konvas {
     this.renders = renders
     this.nodesMap = new Map()
 
+    this.activeNode = null
+    this.resizer = null
+    this.dragger = null
+
     this.layout = {
       width: this.opts.width,
       height: this.opts.height,
       scale: this.opts.scale
     }
 
-    if (this.opts.draggable) {
-      initDragger(this)
-      initResizer(this)
-    }
+    initDragger(this, this.opts.dragger)
+
+    initResizer(this, this.opts.resizer)
+
+    initGrid(this)
 
     initEvent(this)
     this.initStyle()
     if (this.opts.nodes) {
       this.opts.nodes.forEach((node: any) => this.addNode(node))
     }
+
+    console.log(`放大系数: ${this.layout.scale}`)
   }
 
   private initStyle() {
@@ -130,7 +149,7 @@ class Konvas {
 
   public setScale(num: number) {
     this.layout.scale = num
-    this.nodes.forEach(node => node.scale(num))
+    this.nodes.forEach(node => node.setScale(num))
     this.render()
   }
 
@@ -161,6 +180,18 @@ class Konvas {
 
   public zoom(num: number) {
     console.log(num)
+  }
+
+  public enable(flag: string) {
+    console.log(flag)
+  }
+
+  public active(node: string) {
+    const activeNode  = this.select(node)
+    if (activeNode) {
+      this.activeNode = activeNode
+    }
+    return this
   }
 }
 

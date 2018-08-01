@@ -17,7 +17,7 @@ const Cursors = [
 
 class Resizeable {
   public el: any
-  private cursors: any
+  public cursors: any
   private layout: any
   private options: any
   private controls: any
@@ -45,6 +45,7 @@ class Resizeable {
     this.el.classList.add('resizer')
     this.options = options
     this.controls = {}
+
     if (options.dragger) {
       this.dragger = options.dragger
     }
@@ -63,7 +64,7 @@ class Resizeable {
       right: 0,
       bottom: 0,
       left: 0,
-      background: 'rgba(0, 0, 0, 0.3)'
+      border: '1px solid #616097'
     })
     this.el.appendChild(border)
 
@@ -75,9 +76,7 @@ class Resizeable {
   createCursor(type: string) {
     let elem = document.createElement('div')
     this.controls[type] = elem
-
     this.controls[type] = this[type] = new Cursor(elem, { style: CursorStyles[type], type })
-
     this.el.appendChild(elem)
   }
 
@@ -89,17 +88,18 @@ class Resizeable {
     this.el.style.display = 'block'
   }
 
-  setCursor(type, x, y) {
-    let result = {}
+  setCursor(type: string, x: number, y: number) {
+    let result: any = {}
+
     /**
      * north west
      * x 变 y 变 width 变 height 变
      */
     if (type === 'nw') {
-      let width = this.start.x - x + this.start.width
-      let height = this.start.y - y + this.start.height
+      let w = this.start.x - x + this.start.w
+      let h = this.start.y - y + this.start.h
 
-      Object.assign(result, { x, y, width, height })
+      Object.assign(result, { x, y, w, h })
     }
 
     /**
@@ -107,10 +107,10 @@ class Resizeable {
      * x 不变 y 变 width 不变 height 变
      */
     if (type === 'n') {
-      let height = this.start.y - y + this.start.height
+      let h = this.start.y - y + this.start.h
 
       result.y = y
-      result.height = height
+      result.h = h
     }
 
     /**
@@ -118,42 +118,36 @@ class Resizeable {
      * x 不变 y 变 width 变 height 变
      */
     if (type === 'ne') {
-      let width = x - this.start.x
-      let height = this.start.y - y + this.start.height
+      let w = x - this.start.x
+      let h = this.start.y - y + this.start.h
 
       if (this.start.y - y <= -120) {
         y = this.start.y - (-120)
-        height = this.start.y - y + this.start.height
+        h = this.start.y - y + this.start.h
       }
 
-      Object.assign(result, { width, height, y })
+      Object.assign(result, { w, h, y })
     }
 
     /**
      * west
-     * x 变
-     * y 不变
-     * w 变
-     * h 不变
+     * x 变 y 不变 w 变 h 不变
      */
     if (type === 'w') {
-      let width = this.start.x - x + this.start.width
+      let w = this.start.x - x + this.start.w
 
       result.x = x
-      result.width = width
+      result.w = w
     }
 
     /**
-     * e 东
-     * x 不变
-     * y 不变
-     * w 变
-     * h 不变
+     * east 东
+     * x 不变 y 不变 w 变 h 不变
      */
     if (type === 'e') {
-      let width = x - this.x
+      let w = x - this.x
 
-      result.width = width
+      result.w = w
     }
 
     /**
@@ -161,25 +155,25 @@ class Resizeable {
      * x 变 y 不变 width 变 height 变
      */
      if (type === 'sw') {
-       let width = this.start.x - x + this.start.width
-       let height = y - this.start.y
+       let w = this.start.x - x + this.start.w
+       let h = y - this.start.y
 
        result.x = x
-       result.width = width
-       result.height = height
+       result.w = w
+       result.h = h
      }
 
     /**
      * south
      */
     if (type === 's') {
-      let height = y - this.y
+      let h = y - this.y
 
-      if (height < 50) {
-        height = 50
+      if (h < 50) {
+        h = 50
       }
 
-      result.height = height
+      result.h = h
     }
 
     /**
@@ -187,15 +181,16 @@ class Resizeable {
      * x 变 y 变 width 变 height 变
      */
     if (type === 'se') {
-      let width = x - this.start.x
-      let height = y - this.start.y
+      let w = x - this.start.x
+      let h = y - this.start.y
 
-      Object.assign(result, { width, height })
+      Object.assign(result, { w, h })
     }
 
-
     this.update(result)
-    this.onResize(result)
+    if (this.options.onResize) {
+      this.options.onResize(result)
+    }
   }
 
   set width(val) {
@@ -237,30 +232,29 @@ class Resizeable {
   }
 
   active(coords: any) {
-    const { x, y, width = 100, height = 100 } = coords
+    const { x, y, scale, w = 100, h = 100 } = coords
     this._x = x
     this._y = y
-    this._w = width
-    this._h = height
+    this._w = w
+    this._h = h
 
-    this.update({ x, y, width, height })
+    this.update({ x, y, w, h, scale })
     this.show()
   }
 
-  /**
-   * 更新位置信息
-   */
+  // 更新位置信息
   update(coords?: any) {
     this.x = typeof coords.x !== 'undefined' ? coords.x : this.x
     this.y = typeof coords.y !== 'undefined' ? coords.y : this.y
-    this.w = typeof coords.width !== 'undefined' ? coords.width : this.w
-    this.h = typeof coords.height !== 'undefined' ? coords.height : this.h
+    this.w = typeof coords.w !== 'undefined' ? coords.w : this.w
+    this.h = typeof coords.h !== 'undefined' ? coords.h : this.h
+    const { scale } = coords
 
-    if (typeof coords.width === 'number') {
-      this.width = coords.width
+    if (typeof coords.w === 'number') {
+      this.w = coords.w
     }
-    if (typeof coords.height === 'number') {
-      this.height = coords.height
+    if (typeof coords.h === 'number') {
+      this.h = coords.h
     }
     if (typeof coords.x === 'number') {
       this.x = coords.x
@@ -268,16 +262,10 @@ class Resizeable {
     if (typeof coords.y === 'number') {
       this.y = coords.y
     }
-    /*
-    const x = this.x * this._scale
-    const y = this.y * this._scale
-    const w = this.w * this._scale
-    const h = this.h * this._scale
-    */
-   const x = this.x
-   const y = this.y
-   const w = this.w
-   const h = this.h
+    const x = this.x * scale
+    const y = this.y * scale
+    const w = this.w * scale
+    const h = this.h * scale
 
     this.controls.nw.set(0, 0) // coords.x, coords.y)
     this.controls.n.set(w / 2, 0)

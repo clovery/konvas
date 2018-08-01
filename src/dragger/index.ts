@@ -1,33 +1,53 @@
-import Canvas from '../index'
-// import isOut from './isOut'
+import Konvas from '../index'
 import getNodeDOM from '../utils/getNodeDOM'
+import EventEmitter from '../utils/eventeimtter'
+import getVirtualPoint from './getVirtualPoint'
+
+/**
+ * 坐标点以画布中的虚拟坐标点为准
+ * 画布中坐标点计算方式
+ * x: (e.pageX - konvas.left) / scale
+ * y: (e.pageY - konvas.top) / scale
+ * 
+ * 点击拖拽节点，获取点击位置相对节点边界的距离
+ * offsetX: x - node.x
+ * offsetY: y - node.y
+ */
 
 /**
  * Dragger
  */
-class Dragger {
-  private canvas: Canvas
+class Dragger  {
+  private canvas: Konvas
   private opts: { onStart: any, onStop: any, onMove: any }
   private active: any
   private dragging: any
   public mouse: any
-  private startPoint: any
+  private offsetPoint: any
   private x: number | null
   private y: number | null
+  public el: HTMLElement
+  private ee: any
 
-  constructor(canvas: Canvas, opts: any) {
+  constructor(canvas: Konvas, opts: any) {
     this.canvas = canvas
     this.opts = opts
     this.x = 0
     this.y = 0
     this.initEvent()
+    this.el = document.createElement('div')
+    this.el.style.position = 'absolute'
+    canvas.el.appendChild(this.el)
+
+    this.el.style.zIndex = '2222'
+    this.el.style.background = '#687d6e'
+    this.el.style.minWidth = '120px'
+    this.ee = new EventEmitter()
   }
 
   private initEvent() {
     this.canvas.el.addEventListener('mousedown', this.onMouseDown, false)
     this.canvas.el.addEventListener('mouseup', this.onMouseUp, false)
-    // this.canvas.elem.addEventListener('mouseleave', this.onMouseUp, false)
-
     document.documentElement.addEventListener('mousemove', this.onMouseMove, false)
     document.documentElement.addEventListener('mouseup', this.onMouseUp, false)
   }
@@ -49,67 +69,43 @@ class Dragger {
     if (this.active && this.active.isDraggable) {
       this.dragging = true
 
-      // 获取节点拖拽开始时，鼠标位置与节点边界的偏移值
-      const { pageX, pageY } = evt
-      const canvasX = this.canvas.left
-      const canvasY = this.canvas.top
-      const nodeX = this.active.x
-      const nodeY = this.active.y
+      const evtPoint = {
+        x: evt.pageX,
+        y: evt.pageY
+      }
+      const konvasOffset = getKonvasOffset(this.canvas)
+      const scale = this.canvas.getScale()
+      const offsetPoint = getVirtualPoint(evtPoint, konvasOffset, scale, this.active)
 
-      const offsetX = pageX - canvasX - nodeX
-      const offsetY = pageY - canvasY - nodeY
+      this.offsetPoint = offsetPoint
 
-      this.startPoint = { x: offsetX, y: offsetY }
-
-      if (this.opts.onStart && targetElem) {
-        this.opts.onStart(targetElem.id)
+      if (targetElem) {
+        this.ee.emit('start', targetElem.id)
       }
     }
 
     return e
   }
 
-  private onMouseMove = (e: MouseEvent) => {
-    if (e.stopPropagation) {
-      e.stopPropagation()
+  private onMouseMove = (evt: MouseEvent) => {
+    if (evt.stopPropagation) {
+      evt.stopPropagation()
     }
-    if (e.preventDefault) {
-      e.preventDefault()
+    if (evt.preventDefault) {
+      evt.preventDefault()
     }
-
-    let x = e.pageX - this.canvas.left
-    let y = e.pageY - this.canvas.top
-    // const scale = this.canvas.getScale()
-
-    const { pageX, pageY } = e
-    const canvasX = this.canvas.left
-    const canvasY = this.canvas.top
-    // 鼠标在画布中的位置
-    // pageX - canvasX
-    // pageY - canvasY
-    // 画布中鼠标位置
-    const mouseX = pageX - canvasX
-    const mouseY = pageY - canvasY
-
-    this.mouse = { x: mouseX, y: mouseY }
 
     if (this.dragging && this.active) {
-      x = x - this.startPoint.x
-      y = y - this.startPoint.y
-      x = parseInt(String(Math.round(x)), 10)
-      y = parseInt(String(Math.round(y)), 10)
+      const scale = this.canvas.getScale()
+      const evtPoint = { x: evt.pageX, y: evt.pageY }
+      const konvasOffset = getKonvasOffset(this.canvas)
+      const virtual = getVirtualPoint(evtPoint, konvasOffset, scale, this.offsetPoint)
 
-      /*
-      const isout = isOut(x, y, this.canvas, this.active)
-      if (isout.x >= 0 || isout.y >= 0) {
-        x = isout.x
-        y = isout.y
-      }
-      */
+      this.el.style.left = `${virtual.x * scale}px`
+      this.el.style.top = `${(virtual.y + this.active.h) * scale}px`
+      this.el.textContent = `x: ${virtual.x} y: ${virtual.y}`
 
-      this.opts.onMove({ x, y }, this.active.id)
-      this.x = x
-      this.y = y
+      this.ee.emit('move', { ...virtual })
     }
   }
 
@@ -134,6 +130,17 @@ class Dragger {
       }
     }
   }
+
+  public on(name: string, fn: any) {
+    this.ee.on(name, fn)
+  }
 }
 
 export default Dragger
+
+function getKonvasOffset(konvas: Konvas) {
+  return {
+    x: konvas.left,
+    y: konvas.top
+  }
+}

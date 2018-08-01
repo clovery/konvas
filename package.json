@@ -10,11 +10,18 @@
   },
   "devDependencies": {
     "@types/ejs": "^2.5.0",
+    "@types/eventemitter3": "^2.0.2",
     "@types/jest": "^22.1.0",
+    "@types/node": "^10.5.5",
     "@types/supertest": "^2.0.4",
     "cross-env": "^5.1.4",
     "jest": "^22.1.4",
+    "lodash.camelcase": "^4.3.0",
     "rollup": "^0.57.1",
+    "rollup-plugin-commonjs": "^9.1.4",
+    "rollup-plugin-json": "^3.0.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-sourcemaps": "^0.4.2",
     "rollup-plugin-typescript2": "^0.12.0",
     "rollup-plugin-uglify": "^3.0.0",
     "supertest": "^3.0.0",
@@ -23,5 +30,7 @@
     "tslint": "5.7.0",
     "typescript": "^2.7.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "eventemitter3": "^3.1.0"
+  }
 }

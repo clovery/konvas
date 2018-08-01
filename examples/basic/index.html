@@ -20,16 +20,19 @@
   const width = 600
   const height = 300
 
-const konvas = new Konvas('#konvas', { scale: 1.5 })
-const node1 = konvas.addNode({
+const konvas = new Konvas('#konvas', {
+  scale: 2,
+  resizeable: false,
+})
+konvas.addNode({
   x: 80, y: 80, width: 60, height: 60, text: 'Text'
 })
-const div = document.createElement('div')
-div.innerHTML = 'Text'
-node1.wrap(div)
-
 konvas.addNode({
   x: 600 - 60, y: 300 - 60, width: 60, height: 60, text: 'Text'
+})
+
+konvas.addNode({
+  x: (600 - 20) / 2, y: (300 - 60) / 2, width: 20, height: 20, text: 'Text'
 })
 </script>
 </body>

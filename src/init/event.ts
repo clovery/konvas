@@ -1,18 +1,19 @@
-import Konvas from './index'
-import getNodeDOM from './utils/getNodeDOM'
-import extend from './utils/extend'
+import Konvas from '../konvas'
+import getNodeDOM from '../utils/getNodeDOM'
+import extend from '../utils/extend'
 
 export default function initEvent(konvas: Konvas) {
   extend(konvas, {
     selectNode(id: string) {
       const node = this.getNode(id)
+
       if (node) {
         this.activeNode = node
         this.node = node
       }
 
       if (this.resizer) {
-        this.resizer.active(this.activeNode)
+        this.resizer.setAdjustObject(this.activeNode).active()
       }
     }
   })

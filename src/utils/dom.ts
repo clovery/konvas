@@ -9,3 +9,9 @@ export function query(el: string | Element): Element {
     return el
   }
 }
+
+export function createElement(tag: string) {
+  return document.createElement(tag)
+}
+
+export const createElem = createElement

@@ -1,12 +1,9 @@
-import { isBool } from './utils/index'
+import { isBool } from './utils'
 
 let uid: number = 1
 
-/**
- *
- */
 class Node {
-  private el: Element
+  private el: HTMLElement
   private data: any
   public id: string
   public left: number
@@ -29,7 +26,7 @@ class Node {
     this.el.classList.add('node')
     this.el.setAttribute('data-type', 'node')
 
-    this.isDraggable = isBool(data.draggable) ? data.draggable : true
+    this.isDraggable = false // isBool(data.draggable) ? data.draggable : true
 
     this.islocked = false
     this.data = { ...data }
@@ -108,27 +105,6 @@ class Node {
   public getScale() {
     return this.layout.scale
   }
-  /*
-  get scale() {
-    return this.data.scale || 1
-  }
-
-  set scale(val) {
-    this.data.scale = val
-    this.render()
-  }
-  */
-  /*
-  set rotate(deg: number) {
-    this.layout.rotate = deg
-    const el = this.el as HTMLElement
-    el.style.transform = `rotate(${deg}deg)`
-  }
-
-  get rotate() {
-    return this.layout.rotate
-  }
-  */
 
   public lock() {
     this.islocked = true
@@ -151,6 +127,13 @@ class Node {
     el.style.top = `${ y * scale }px`
 
     return this
+  }
+
+  public resize(w: number, h: number) {
+    this.layout.w = w
+    this.layout.h = h
+    this.el.style.width = w * this.scale + 'px'
+    this.el.style.height = h * this.scale + 'px'
   }
 
   public get(type: string) {
@@ -196,13 +179,7 @@ class Node {
   }
 
   public toJSON() {
-    return {
-      x: this.left,
-      y: this.top,
-      width: this.w,
-      height: this.h,
-      scale: this.scale
-    }
+    return this.layout
   }
 }
 

@@ -2,7 +2,7 @@
 import Cursor from './cursor'
 import setStyle from '../utils/setStyle'
 import CursorStyles from './cursor-styles'
-import initEvent from './initEvent'
+import EventEmitter from '../utils/eventeimtter'
 
 /**
  * nw ------ n ------ ne
@@ -15,7 +15,7 @@ const Cursors = [
   'sw', 's', 'se'
 ]
 
-class Resizeable {
+class Resizer extends (EventEmitter as { new(): any; }) {
   public el: any
   public cursors: any
   private layout: any
@@ -29,9 +29,11 @@ class Resizeable {
   public onMove: any
   public _scale: any
   private activated: boolean
+  public adjustObject: any
   [key: string]: any
 
   constructor(el?: any, options?: any) {
+    super()
     this.layout = {}
 
     if (!el) {
@@ -62,7 +64,7 @@ class Resizeable {
       position: 'absolute',
       cursor: 'move',
       zIndex: 100
-    }) 
+    })
 
     const border = document.createElement('div')
     setStyle(border, {
@@ -78,7 +80,7 @@ class Resizeable {
     this.activated = true
 
     this.hide()
-    initEvent(this)
+    this.ee = new EventEmitter
   }
 
   get isActive() {
@@ -88,7 +90,7 @@ class Resizeable {
   createCursor(type: string) {
     let elem = document.createElement('div')
     this.controls[type] = elem
-    this.controls[type] = this[type] = new Cursor(elem, { style: CursorStyles[type], type })
+    this.controls[type] = this['cursor_' + type] = new Cursor(elem, { style: CursorStyles[type], type })
     this.el.appendChild(elem)
   }
 
@@ -106,8 +108,14 @@ class Resizeable {
     }
   }
 
-  setCursor(type: string, x: number, y: number) {
-    let result: any = {}
+
+  // 移动某点
+  public moveCursor(type: string, point: any) {
+    this.setCursor(type, point.x, point.y)
+  }
+
+  private setCursor(type: string, x: number, y: number) {
+    let result: any = { ...this.start }
 
     /**
      * north west
@@ -205,88 +213,93 @@ class Resizeable {
       Object.assign(result, { w, h })
     }
 
-    this.update(result)
-    if (this.options.onResize) {
-      this.options.onResize(result)
-    }
+    this.render(result)
   }
 
-  set width(val) {
-    this.layout.width = val
+  render(opts: any) {
+    this.move(opts.x, opts.y)
+    this.resize(opts.w, opts.h)
+
+    this.adjustObject.move(opts.x, opts.y)
+    this.adjustObject.resize(opts.w, opts.h)
+
+    this.emit('resize', this.adjustObject, opts)
   }
 
-  get width() {
-    return this.layout.width
+  resize(w: number, h: number) {
+    this.layout.w = w
+    this.layout.h = h
+
+    this.el.style.width = w * this.scale + 'px'
+    this.el.style.height = h * this.scale + 'px'
   }
 
-  set height(val) {
-    this.layout.height = val
+  get w() {
+    return this.layout.w
   }
 
-  get height() {
-    return this.layout.height
-  }
-
-  set y(val) {
-    this.layout.y = val
+  get h() {
+    return this.layout.h
   }
 
   get y() {
     return this.layout.y
   }
 
-  set x(val) {
-    this.layout.x = val
-  }
-
   get x() {
     return this.layout.x
   }
 
-  onStop() {
-    this._x = this.x
-    this._y = this.y
-    this._w = this.w
-    this._h = this.h
+  // 设置调整对象
+  public setAdjustObject(o: any) {
+    this.adjustObject = o
+
+    const { x, y, scale, w = 100, h = 100 } = o
+    this.update({ x, y, w, h, scale })
+
+    return this
   }
 
-  active(coords: any) {
-    const { x, y, scale, w = 100, h = 100 } = coords
-    this._x = x
-    this._y = y
-    this._w = w
-    this._h = h
-
-    this.update({ x, y, w, h, scale })
+  active() {
     this.show()
-
     this.activated = true
+  }
+
+  inactive() {
+    this.hide()
+    this.activated = false
   }
 
   // 更新位置信息
   update(coords?: any) {
-    this.x = typeof coords.x !== 'undefined' ? coords.x : this.x
-    this.y = typeof coords.y !== 'undefined' ? coords.y : this.y
-    this.w = typeof coords.w !== 'undefined' ? coords.w : this.w
-    this.h = typeof coords.h !== 'undefined' ? coords.h : this.h
+    let x = typeof coords.x !== 'undefined' ? coords.x : this.x
+    let y = typeof coords.y !== 'undefined' ? coords.y : this.y
+    let w = typeof coords.w !== 'undefined' ? coords.w : this.w
+    let h = typeof coords.h !== 'undefined' ? coords.h : this.h
     const { scale } = coords
 
     if (typeof coords.w === 'number') {
-      this.w = coords.w
+      w = coords.w
     }
     if (typeof coords.h === 'number') {
-      this.h = coords.h
+      h = coords.h
     }
     if (typeof coords.x === 'number') {
-      this.x = coords.x
+      x = coords.x
     }
     if (typeof coords.y === 'number') {
-      this.y = coords.y
+      y = coords.y
     }
-    const x = this.x * scale
-    const y = this.y * scale
-    const w = this.w * scale
-    const h = this.h * scale
+
+    this.layout.x = x
+    this.layout.y = y
+    this.layout.w = w
+    this.layout.h = h
+
+    x = x * scale
+    y = y * scale
+    w = w * scale
+    h = h * scale
 
     this.controls.nw.set(0, 0) // coords.x, coords.y)
     this.controls.n.set(w / 2, 0)
@@ -303,8 +316,6 @@ class Resizeable {
     this.el.style.height = h + 'px'
     this.el.style.left = x + 'px'
     this.el.style.top = y + 'px'
-
-    // this.options.onResize({ x: this.x, y: this.y, w: this.w, h: this.h })
   }
 
   draw() {
@@ -316,8 +327,8 @@ class Resizeable {
     const left = x * this.scale
     const top = y * this.scale
 
-    this.x = x
-    this.y = y
+    this.layout.x = x
+    this.layout.y = y
 
     this.el.style.left = `${left}px`
     this.el.style.top = `${top}px`
@@ -335,4 +346,4 @@ class Resizeable {
   }
 }
 
-export default Resizeable
+export default Resizer

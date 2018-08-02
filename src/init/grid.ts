@@ -1,5 +1,5 @@
-import Konvas from './index'
-import Grid from './grid/index'
+import Konvas from '../konvas'
+import Grid from '../grid'
 
 export default function initGrid(konvas: Konvas) {
   const grid = new Grid({

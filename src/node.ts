@@ -12,6 +12,7 @@ class Node {
   public layout: any
   private opts: any
   private painter: any
+  private lockType: string
 
   public isDraggable: boolean
   public islocked: boolean
@@ -27,6 +28,7 @@ class Node {
     this.el.setAttribute('data-type', 'node')
 
     this.isDraggable = false // isBool(data.draggable) ? data.draggable : true
+    this.lockType = ''
 
     this.islocked = false
     this.data = { ...data }
@@ -106,14 +108,20 @@ class Node {
     return this.layout.scale
   }
 
-  public lock() {
+  public lock(type = 'xy') {
     this.islocked = true
     this.isDraggable = false
+    this.lockType = type
   }
 
   public unlock() {
     this.islocked = false
     this.isDraggable = true
+    this.lockType = ''
+  }
+
+  get unlocked(): boolean {
+    return !this.islocked
   }
 
   public move(x: number, y: number) {

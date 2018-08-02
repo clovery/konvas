@@ -4,6 +4,7 @@ import getNodeDOM from '../utils/getNodeDOM'
 import EventEmitter from '../utils/eventeimtter'
 import getVirtualPoint, { IPoint } from './getVirtualPoint'
 import boundaryRestrict from '../utils/boundaryRestrict'
+import { IPosition } from '../interfaces';
 
 /**
  * 坐标点以画布中的虚拟坐标点为准
@@ -70,12 +71,14 @@ class Dragger extends (EventEmitter as { new(): any; }) {
 
   private getActive(elem: HTMLElement) {
     const type = elem.getAttribute('data-type')
+    let hit = null
     if (type === 'node') {
-      return this.canvas.getNode(elem.id)
+      hit = this.canvas.getNode(elem.id)
     }
     if (type === 'resizer') {
-      return this.canvas.resizer
+      hit = this.canvas.resizer
     }
+    return hit
   }
 
   get scale() {
@@ -90,6 +93,9 @@ class Dragger extends (EventEmitter as { new(): any; }) {
 
     if (el) {
       this.active = this.getActive(el)
+      if (isDisableDrag(this.active, 'xy')) {
+        return
+      }
 
       const evtPoint = { x: evt.pageX, y: evt.pageY }
       const konvasOffset = getKonvasOffset(this.canvas)
@@ -119,9 +125,9 @@ class Dragger extends (EventEmitter as { new(): any; }) {
 
     if (this.dragging && this.active) {
       let position = getVirtualPoint(evtPoint, konvasOffset, scale, this.offsetPoint)
-      position = boundaryRestrict(position, this.canvas, this.active)
-      this.lastVirtualPoint = position
+      position = filterPosition(position, this.active, this.canvas)
 
+      this.lastVirtualPoint = position
       this.emit('move', { ... position }, this.active)
     }
 
@@ -154,4 +160,24 @@ function getKonvasOffset(konvas: Konvas) {
     x: konvas.left,
     y: konvas.top
   }
+}
+
+function isDisableDrag(item: any, type: string): boolean {
+  if (item && 'lockType' in item) {
+    return item.lockType === type
+  }
+
+  return false
+}
+
+function filterPosition(position: IPosition, item: any, konvas: Konvas) {
+  const retPosition = boundaryRestrict(position, konvas, item)
+  if (isDisableDrag(item, 'x')) { // 锁定 x 轴
+    retPosition.x = item.x
+  }
+  if (isDisableDrag(item, 'y')) { // 锁定 y 轴
+    retPosition.y = item.y
+  }
+
+  return retPosition
 }

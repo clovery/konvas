@@ -261,6 +261,9 @@ class Resizer extends (EventEmitter as { new(): any; }) {
   }
 
   active() {
+    if (!this.adjustObject) {
+      return
+    }
     this.show()
     this.activated = true
   }

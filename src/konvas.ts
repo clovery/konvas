@@ -32,7 +32,7 @@ class Konvas {
   public el: Element
   public opts: any
   public nodes: Node[]
-  public activeNode: Node | null
+  public liveNode: Node | null
   private nodesMap: Map<string, Node>
   public layout: {
     width: number,
@@ -52,7 +52,7 @@ class Konvas {
     this.renders = renders
     this.nodesMap = new Map()
 
-    this.activeNode = null
+    this.liveNode = null
 
     this.layout = {
       width: this.opts.width,
@@ -117,9 +117,8 @@ class Konvas {
   }
 
   public getNode(node: Node | string): Node | null {
-    if (typeof node === 'string') {
-      const filters = this.nodes.filter((item: any) => item.id === node)
-      return filters[0]
+    if (typeof node === 'string' || typeof node === 'number') {
+      return this.nodes.find((item: any) => item.id === String(node)) || null
     }
     return node
   }
@@ -193,9 +192,9 @@ class Konvas {
   }
 
   public active(node: string) {
-    const activeNode  = this.select(node)
-    if (activeNode) {
-      this.activeNode = activeNode
+    const liveNode  = this.select(node)
+    if (liveNode) {
+      this.liveNode = liveNode
     }
     return this
   }
@@ -207,9 +206,19 @@ class Konvas {
     }
   }
 
-  public lock(node: Node) {
-    node.lock()
-    this.resizer.inactive()
+  public unlock(node: string, type?: string) {
+    const n = this.getNode(node)
+    if (n) {
+      n.unlock()
+    }
+  }
+
+  public lock(node: string | Node, type?: string) {
+    const n = this.getNode(node)
+    if (n) {
+      n.lock(type)
+      this.resizer.inactive()
+    }
   }
 }
 

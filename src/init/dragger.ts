@@ -11,13 +11,13 @@ export default function(konvas: Konvas, options: object) {
     const node = konvas.getNode(id)
 
     if (node) {
-      konvas.activeNode = node
+      konvas.liveNode = node
     }
   })
 
   dragger.on('move', (data: any) => {
-    if (konvas.activeNode) {
-      konvas.activeNode.move(data.x, data.y)
+    if (konvas.liveNode) {
+      konvas.liveNode.move(data.x, data.y)
     }
   })
 
@@ -25,31 +25,31 @@ export default function(konvas: Konvas, options: object) {
   // vertical: top, middle, bottom
   extend(konvas, {
     align(dir: string) {
-      if (this.activeNode) {
+      if (this.liveNode) {
         if (dir === 'left') {
-          this.activeNode.move(0, this.activeNode.y)
+          this.liveNode.move(0, this.liveNode.y)
         }
         if (dir === 'center') {
-          this.activeNode.move(this.w / 2 - (this.activeNode.w / 2), this.activeNode.y)
+          this.liveNode.move(this.w / 2 - (this.liveNode.w / 2), this.liveNode.y)
         }
         if (dir === 'right') {
-          this.activeNode.move(this.w - this.activeNode.w, this.activeNode.y)
+          this.liveNode.move(this.w - this.liveNode.w, this.liveNode.y)
         }
       }
       return this
     },
 
     vertical(dir: string) {
-      if (this.activeNode) {
-        const node = this.activeNode
+      if (this.liveNode) {
+        const node = this.liveNode
         if (dir === 'top') {
-          this.activeNode.move(node.x, 0)
+          this.liveNode.move(node.x, 0)
         }
         if (dir === 'middle') {
-          this.activeNode.move(node.x, this.h / 2 - (node.h / 2))
+          this.liveNode.move(node.x, this.h / 2 - (node.h / 2))
         }
         if (dir === 'bottom') {
-          this.activeNode.move(node.x, this.h - node.h)
+          this.liveNode.move(node.x, this.h - node.h)
         }
       }
       return this

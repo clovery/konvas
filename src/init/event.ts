@@ -7,13 +7,13 @@ export default function initEvent(konvas: Konvas) {
     selectNode(id: string) {
       const node = this.getNode(id)
 
-      if (node) {
-        this.activeNode = node
-        this.node = node
-      }
+      this.resizer.adjustObject = null
+      if (node && node.unlocked) {
+        this.liveNode = node
 
-      if (this.resizer) {
-        this.resizer.setAdjustObject(this.activeNode).active()
+        if (this.resizer) {
+          this.resizer.setAdjustObject(this.liveNode).active()
+        }
       }
     }
   })

@@ -3,6 +3,7 @@ import Cursor from './cursor'
 import setStyle from '../utils/setStyle'
 import CursorStyles from './cursor-styles'
 import EventEmitter from '../utils/eventeimtter'
+import { createElem } from '../utils/dom'
 
 /**
  * nw ------ n ------ ne
@@ -78,6 +79,20 @@ class Resizer extends (EventEmitter as { new(): any; }) {
     this.el.appendChild(border)
 
     this.activated = true
+
+    const rotate = createElem('div')
+    rotate.setAttribute('data-type', 'rotate')
+    setStyle(rotate, {
+      position: 'absolute',
+      bottom: '-30px',
+      left: '50%',
+      width: '6px',
+      height: '6px',
+      border: '1px solid #616097',
+      borderRadius: '100px',
+      marginLeft: '-4px'
+    })
+    this.el.appendChild(rotate)
 
     this.hide()
     this.ee = new EventEmitter
@@ -337,6 +352,11 @@ class Resizer extends (EventEmitter as { new(): any; }) {
     this.el.style.top = `${top}px`
 
     return this
+  }
+
+  setRotate(degree: number) {
+    this.layout.degree = degree
+    this.el.style.transform = `rotate(${degree}deg)`
   }
 
   get scale() {

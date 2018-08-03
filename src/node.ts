@@ -92,7 +92,7 @@ class Node {
   }
   */
 
-  public rotate(deg: number) {
+  public setRotate(deg: number) {
     this.layout.rotate = deg
     const el = this.el as HTMLElement
     el.style.transform = `rotate(${deg}deg)`

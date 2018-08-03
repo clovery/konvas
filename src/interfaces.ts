@@ -3,6 +3,11 @@ export interface IPosition {
   y: number
 }
 
+export interface IPoint {
+  x: number
+  y: number
+}
+
 export interface ISize {
   w: number
   h: number

@@ -1,6 +1,7 @@
 import Konvas from '../konvas'
 import Resizer from '../resizer'
 import { IPosition } from '../interfaces'
+import rotate from '../utils/rotate'
 import boundaryRestrict from '../utils/boundaryRestrict'
 
 export default function(konvas: Konvas, options: object) {
@@ -35,6 +36,14 @@ export default function(konvas: Konvas, options: object) {
       onMove(data: any, type: string) {
         const position = boundaryRestrict(data.position, konvas)
         resizer.moveCursor(type, position)
+      }
+    })
+
+    dragger.addDragger('rotate', {
+      onMove(data: any) {
+        const degree =  rotate(data.position, resizer.adjustObject)
+        resizer.adjustObject.setRotate(degree)
+        resizer.setRotate(degree)
       }
     })
   }

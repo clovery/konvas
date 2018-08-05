@@ -46,3 +46,5 @@ node.wrap()
 -  [x] node rotate
 -  [x] node locked
 
+
+konvas.on('node.change', (layout) => {})

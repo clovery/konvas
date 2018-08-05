@@ -18,8 +18,8 @@ export default function(konvas: Konvas, options: object) {
     })
 
     // 拖拽停止
-    dragger.on('stop', (p: IPosition) => {
-      resizer.move(p.x, p.y).active()
+    dragger.on('stop', () => {
+      resizer.active(konvas.liveNode)
     })
 
     dragger.addSelector('resizer')

@@ -3,7 +3,7 @@ import round from './round'
 
 // https://stackoverflow.com/questions/15653801/rotating-object-to-face-mouse-pointer-on-mousemove
 // Math.atan2(e.pageX - center.x, - (e.pageY - center.y)) * ( 180 / Math.PI)
-export default function(p: IPosition, item: any) {
+export default function(p: IPoint, item: any) {
   const centerX = item.x + item.w / 2
   const centerY  = item.y + item.h / 2
   const radians = Math.atan2(p.x - centerX, p.y - centerY)
@@ -11,11 +11,11 @@ export default function(p: IPosition, item: any) {
 
   // const angle = (radians * (180 / Math.PI))
   getPoints(item, Math.abs(degree))
-  return degree
+  return Math.round(degree)
 }
 
 function getPoints(item: any, angle: number) {
-  const center = getCenterPosition(item)
+  const center = getCenterPoint(item)
 
   const lt = rotatePoint(item, {
     x: item.x + item.w / 2,
@@ -40,7 +40,7 @@ function getPoints(item: any, angle: number) {
   // console.log(lt, rt, rb, lb)
 }
 
-function getCenterPosition(item: any) {
+function getCenterPoint(item: any) {
   const centerX = item.x + item.w / 2
   const centerY  = item.y + item.h / 2
   return {

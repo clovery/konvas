@@ -1,8 +1,10 @@
-import { isBool } from './utils'
+import event from './event'
+import extend from './utils/extend'
+import layoutSetGet, { ISetGetter } from './utils/layoutSetGet'
 
 let uid: number = 1
 
-class Node {
+class Node implements ISetGetter {
   private el: HTMLElement
   private data: any
   public id: string
@@ -16,11 +18,15 @@ class Node {
 
   public isDraggable: boolean
   public islocked: boolean
+  public get: any
+  public set: any
+  public klass: string
 
   constructor(data: any, opts: any) {
     this.el = document.createElement('div')
     this.opts = opts
 
+    this.klass = 'node'
     this.id = String(uid++)
     this.el.id = this.id
 
@@ -78,42 +84,15 @@ class Node {
     return this.layout.rotate
   }
 
-  public get(type: string) {
-    return this.layout[type]
-  }
-
-  /*
-  get width() {
-    return this.data.width || this.data.w
-  }
-
-  set width(val) {
-    this.data.width = val
-  }
-
-  get height() {
-    return this.data.height || this.data.h
-  }
-
-  set height(val: number) {
-    this.data.height = val
-  }
-  */
-
   public setRotate(deg: number) {
-    this.layout.rotate = deg
-    const el = this.el as HTMLElement
-    el.style.transform = `rotate(${deg}deg)`
+    this.set('rotate', deg)
+    this.el.style.transform = `rotate(${deg}deg)`
     return this
   }
 
   public setScale(val: number) {
-    this.layout.scale = val
+    this.set('scale', val)
     this.render()
-  }
-
-  public getScale() {
-    return this.layout.scale
   }
 
   public lock(type = 'xy') {
@@ -133,28 +112,25 @@ class Node {
   }
 
   public move(x: number, y: number) {
-    this.layout.x = x
-    this.layout.y = y
+    this.set({ x, y })
 
-    const el = this.el as HTMLElement
-    const scale = this.layout.scale
+    const scale = this.get('scale')
 
-    el.style.left = `${ x * scale }px`
-    el.style.top = `${ y * scale }px`
+    this.el.style.left = `${ x * scale }px`
+    this.el.style.top = `${ y * scale }px`
 
     return this
   }
 
   public resize(w: number, h: number) {
-    this.layout.w = w
-    this.layout.h = h
+    this.set({ w, h })
     this.el.style.width = w * this.scale + 'px'
     this.el.style.height = h * this.scale + 'px'
   }
 
   public render() {
-    const el = this.el as HTMLElement
-    const scale = this.layout.scale
+    const el = this.el
+    const scale = this.scale
 
     const x = this.x * scale
     const y = this.y * scale
@@ -194,5 +170,7 @@ class Node {
     return this.layout
   }
 }
+
+extend(Node.prototype, layoutSetGet)
 
 export default Node

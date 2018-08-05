@@ -74,6 +74,14 @@ class Node {
     return this.layout.scale
   }
 
+  get rotate() {
+    return this.layout.rotate
+  }
+
+  public get(type: string) {
+    return this.layout[type]
+  }
+
   /*
   get width() {
     return this.data.width || this.data.w
@@ -142,10 +150,6 @@ class Node {
     this.layout.h = h
     this.el.style.width = w * this.scale + 'px'
     this.el.style.height = h * this.scale + 'px'
-  }
-
-  public get(type: string) {
-    return this.layout[type]
   }
 
   public render() {

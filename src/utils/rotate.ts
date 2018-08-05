@@ -7,10 +7,10 @@ export default function(p: IPosition, item: any) {
   const centerX = item.x + item.w / 2
   const centerY  = item.y + item.h / 2
   const radians = Math.atan2(p.x - centerX, p.y - centerY)
-  const degree = (radians * (180 / Math.PI) * -1)
+  const degree = (radians * (180 / Math.PI) * -1) - 90 - 45
 
-  const angle = (radians * (180 / Math.PI))
-  getPoints(item, angle)
+  // const angle = (radians * (180 / Math.PI))
+  getPoints(item, Math.abs(degree))
   return degree
 }
 
@@ -37,7 +37,7 @@ function getPoints(item: any, angle: number) {
     y: item.y + item.h
   }, center, angle)
 
-  console.log(lt, rt, rb, lb)
+  // console.log(lt, rt, rb, lb)
 }
 
 function getCenterPosition(item: any) {

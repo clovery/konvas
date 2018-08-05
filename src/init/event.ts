@@ -12,7 +12,7 @@ export default function initEvent(konvas: Konvas) {
         this.liveNode = node
 
         if (this.resizer) {
-          this.resizer.setAdjustObject(this.liveNode).active()
+          this.resizer.active(this.liveNode)
         }
       }
     }

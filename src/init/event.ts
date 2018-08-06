@@ -21,13 +21,17 @@ export default function initEvent(konvas: Konvas) {
 
   const selectNodeHandler = (evt: Event) => {
     const target = evt.target as HTMLElement
+
     const el = getNodeDOM(target, '[data-type="node"]')
     if (el) {
       konvas.selectNode(el.id)
-    } else {
-      // @todo
-      // konvas.resizer.inactive()
     }
+
+    /*
+    if (target.matches('.konvas')) {
+      konvas.resizer.inactive()
+    }
+    */
   }
 
   konvas.el.addEventListener('click', selectNodeHandler, false)

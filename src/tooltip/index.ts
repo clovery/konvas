@@ -18,7 +18,8 @@ class Tooltip {
       padding: '2px 4px',
       color: '#231b1b',
       borderRadius: '3px',
-      fontSize: '14px'
+      fontSize: '14px',
+      display: 'none'
     })
   }
 

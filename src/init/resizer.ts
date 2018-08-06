@@ -1,6 +1,6 @@
 import Konvas from '../konvas'
 import Resizer from '../resizer'
-import { IPosition } from '../interfaces'
+import { IPoint } from '../interfaces'
 import rotate from '../utils/rotate'
 import boundaryRestrict from '../utils/boundaryRestrict'
 
@@ -9,21 +9,24 @@ export default function(konvas: Konvas, options: object) {
     dragger: konvas.dragger,
     ...options
   })
+  konvas.register('resizer', resizer)
 
   if (konvas.dragger) {
     const { dragger } = konvas
 
-    dragger.on('move', (data: any) => {
-      resizer.inactive()
+    // 移动
+    dragger.addDragger('resizer', {
+      onMove(point: IPoint, data: any) {
+        if (data.point) {
+          const p = data.point
+          resizer.move(p.x, p.y)
+          konvas.move(p.x, p.y)
+        }
+      }
     })
 
-    // 拖拽停止
-    dragger.on('stop', () => {
-      resizer.active(konvas.liveNode)
-    })
-
-    dragger.addSelector('resizer')
-    dragger.addSelector('resizer-cursor', {
+    // 调整尺寸
+    dragger.addDragger('resizer-cursor', {
       onStart() {
         resizer.start = {
           x: resizer.adjustObject.x,
@@ -33,20 +36,23 @@ export default function(konvas: Konvas, options: object) {
         }
       },
 
-      onMove(data: any, type: string) {
-        const position = boundaryRestrict(data.position, konvas)
-        resizer.moveCursor(type, position)
+      onMove(point: IPoint, data: any) {
+        const position = boundaryRestrict(point, konvas)
+        resizer.moveCursor(data.type, position)
+
+        konvas.resize(resizer.w, resizer.h)
+        konvas.move(resizer.x, resizer.y)
       }
     })
 
+    // 旋转
     dragger.addDragger('rotate', {
-      onMove(data: any) {
-        const degree =  rotate(data.position, resizer.adjustObject)
+      onMove(point: IPoint) {
+        const degree =  rotate(point, resizer.adjustObject)
         resizer.adjustObject.setRotate(degree)
         resizer.setRotate(degree)
       }
     })
   }
 
-  konvas.register('resizer', resizer)
 }

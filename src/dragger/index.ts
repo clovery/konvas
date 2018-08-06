@@ -1,10 +1,10 @@
-import call from '../utils/call'
-import Konvas from '..'
+import { IPoint } from '../interfaces'
+import call, { _call } from '../utils/call'
+import Konvas from '../konvas'
 import getNodeDOM from '../utils/getNodeDOM'
 import EventEmitter from '../utils/eventeimtter'
-import getVirtualPoint, { IPoint } from './getVirtualPoint'
+import getVirtualPoint from './getVirtualPoint'
 import boundaryRestrict from '../utils/boundaryRestrict'
-import { IPosition } from '../interfaces';
 
 /**
  * 坐标点以画布中的虚拟坐标点为准
@@ -21,7 +21,7 @@ import { IPosition } from '../interfaces';
  * Dragger
  */
 class Dragger extends (EventEmitter as { new(): any; }) {
-  private canvas: Konvas;
+  private konvas: Konvas;
   private opts: { onStart: any, onStop: any, onMove: any }
   private active: any
   private dragging: any
@@ -32,7 +32,7 @@ class Dragger extends (EventEmitter as { new(): any; }) {
 
   constructor(konvas: Konvas, opts: any) {
     super()
-    this.canvas = konvas
+    this.konvas = konvas
     this.opts = opts
     this.initEvent()
 
@@ -41,14 +41,10 @@ class Dragger extends (EventEmitter as { new(): any; }) {
   }
 
   private initEvent() {
-    this.canvas.el.addEventListener('mousedown', this.onMouseDown, false)
-    this.canvas.el.addEventListener('mouseup', this.onMouseUp, false)
+    this.konvas.el.addEventListener('mousedown', this.onMouseDown, false)
+    this.konvas.el.addEventListener('mouseup', this.onMouseUp, false)
     document.documentElement.addEventListener('mousemove', this.onMouseMove, false)
     document.documentElement.addEventListener('mouseup', this.onMouseUp, false)
-  }
-
-  public addSelector(selector: string, opts?: any) {
-    this.selectors[selector] = opts || {}
   }
 
   public addDragger(selector: string, opts?: any) {
@@ -73,19 +69,22 @@ class Dragger extends (EventEmitter as { new(): any; }) {
     const type = elem.getAttribute('data-type')
     let hit = null
     if (type === 'node') {
-      hit = this.canvas.getNode(elem.id)
+      hit = this.konvas.getNode(elem.id)
     }
     if (type === 'resizer') {
-      hit = this.canvas.resizer
+      hit = this.konvas.resizer
     }
     return hit
   }
 
   get scale() {
-    return this.canvas.getScale()
+    return this.konvas.getScale()
   }
 
   private onMouseDown = (e: Event) => {
+    // e.preventDefault()
+    // e.stopPropagation()
+
     const evt = e as MouseEvent
     const target = evt.target as HTMLElement
 
@@ -98,13 +97,14 @@ class Dragger extends (EventEmitter as { new(): any; }) {
       }
 
       const evtPoint = { x: evt.pageX, y: evt.pageY }
-      const konvasOffset = getKonvasOffset(this.canvas)
+      const konvasOffset = getKonvasOffset(this.konvas)
       this.dragging = true
 
       if (this.active) {
         const offsetPoint = getVirtualPoint(evtPoint, konvasOffset, this.scale, this.active)
         this.offsetPoint = offsetPoint
-        this.emit('start', this.active.id)
+        this.emit('start', this.active)
+        _call(this.selectorHandler, 'onStart', this.active)
       } else {
         const virtualPoint = getVirtualPoint(evtPoint, konvasOffset, this.scale)
         call(this.selectorHandler, 'onStart', { virtualPoint })
@@ -121,19 +121,24 @@ class Dragger extends (EventEmitter as { new(): any; }) {
 
     const scale = this.scale
     const evtPoint = { x: evt.pageX, y: evt.pageY }
-    const konvasOffset = getKonvasOffset(this.canvas)
-
-    if (this.dragging && this.active) {
-      let position = getVirtualPoint(evtPoint, konvasOffset, scale, this.offsetPoint)
-      position = filterPosition(position, this.active, this.canvas)
-
-      this.lastVirtualPoint = position
-      this.emit('move', { ... position }, this.active)
-    }
+    const konvasOffset = getKonvasOffset(this.konvas)
 
     if (this.dragging) {
+      if (this.active) {
+        let position = getVirtualPoint(evtPoint, konvasOffset, scale, this.offsetPoint)
+        position = filterPosition(position, this.active, this.konvas)
+
+        this.lastVirtualPoint = position
+        this.emit('move', { ... position }, this.active)
+      }
+
       const konvasPoint = getVirtualPoint(evtPoint, konvasOffset, scale)
-      call(this.selectorHandler, 'onMove', { position: konvasPoint })
+      // call(this.selectorHandler, 'onMove', { position: konvasPoint })
+      _call(this.selectorHandler, 'onMove', konvasPoint, {
+        point: this.lastVirtualPoint,
+        item: this.active,
+        type: this.selectorHandler.type
+      })
     }
   }
 
@@ -170,8 +175,8 @@ function isDisableDrag(item: any, type: string): boolean {
   return false
 }
 
-function filterPosition(position: IPosition, item: any, konvas: Konvas) {
-  const retPosition = boundaryRestrict(position, konvas, item)
+function filterPosition(point: IPoint, item: any, konvas: Konvas) {
+  const retPosition = boundaryRestrict(point, konvas, item)
   if (isDisableDrag(item, 'x')) { // 锁定 x 轴
     retPosition.x = item.x
   }

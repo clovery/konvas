@@ -1,6 +1,7 @@
 import event from './event'
 import extend from './utils/extend'
 import layoutSetGet, { ISetGetter } from './utils/layoutSetGet'
+import { _call } from './utils/call'
 
 let uid: number = 1
 
@@ -43,8 +44,8 @@ class Node implements ISetGetter {
     this.top = this.data.y || 0
 
     this.layout = {
-      w: data.width,
-      h: data.height,
+      w: data.width || data.w,
+      h: data.height || data.h,
       x: this.left,
       y: this.top,
       rotate: 0,
@@ -124,8 +125,13 @@ class Node implements ISetGetter {
 
   public resize(w: number, h: number) {
     this.set({ w, h })
-    this.el.style.width = w * this.scale + 'px'
-    this.el.style.height = h * this.scale + 'px'
+    const width = w * this.scale
+    const height = h * this.scale
+
+    this.el.style.width = `${width}px`
+    this.el.style.height = `${height}px`
+
+    _call(this.painter, 'resize', { width, height })
   }
 
   public render() {

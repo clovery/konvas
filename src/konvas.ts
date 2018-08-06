@@ -94,6 +94,10 @@ class Konvas {
     elem.style.height = `${height}px`
   }
 
+  public add(opts: any, type = 'node') {
+    this.addNode(opts)
+  }
+
   public addNode(node: Node | any) {
     if (node instanceof Node) {
       this.nodes.push(node)
@@ -140,6 +144,10 @@ class Konvas {
     return this.layout.scale
   }
 
+  set scale(val: number) {
+    this.setScale(val)
+  }
+
   public getScale() {
     return this.layout.scale
   }
@@ -147,6 +155,8 @@ class Konvas {
   public setScale(num: number) {
     this.layout.scale = num
     this.nodes.forEach(node => node.setScale(num))
+    this.resizer.scale = num
+
     this.render()
   }
 
@@ -191,6 +201,12 @@ class Konvas {
     console.log(flag)
   }
 
+  public setLiveNode(node: Node) {
+    if (node) {
+      this.liveNode = node
+    }
+  }
+
   public active(node: string) {
     const liveNode  = this.select(node)
     if (liveNode) {
@@ -218,6 +234,18 @@ class Konvas {
     if (n) {
       n.lock(type)
       this.resizer.inactive()
+    }
+  }
+
+  public move(x: number, y: number) {
+    if (this.liveNode) {
+      this.liveNode.move(x, y)
+    }
+  }
+
+  public resize(w: number, h: number) {
+    if (this.liveNode) {
+      this.liveNode.move(w, h)
     }
   }
 }

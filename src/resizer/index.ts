@@ -229,14 +229,6 @@ class Resizer extends (EventEmitter as { new(): any; }) {
     this.emit('resize', this.adjustObject, opts)
   }
 
-  resize(w: number, h: number) {
-    this.layout.w = w
-    this.layout.h = h
-
-    this.el.style.width = w * this.scale + 'px'
-    this.el.style.height = h * this.scale + 'px'
-  }
-
   get w() {
     return this.layout.w
   }
@@ -266,8 +258,7 @@ class Resizer extends (EventEmitter as { new(): any; }) {
   active(liveNode ?: any) {
     if (liveNode) {
       this.setAdjustObject(liveNode)
-      const { x, y, rotate = 0 } = liveNode
-      this.move(x, y)
+      const { rotate = 0 } = liveNode
       this.setRotate(rotate)
     }
     if (!this.adjustObject) {
@@ -348,6 +339,14 @@ class Resizer extends (EventEmitter as { new(): any; }) {
     return this
   }
 
+  resize(w: number, h: number) {
+    this.layout.w = w
+    this.layout.h = h
+
+    this.el.style.width = w * this.scale + 'px'
+    this.el.style.height = h * this.scale + 'px'
+  }
+
   setRotate(degree: number) {
     this.layout.degree = degree
     this.el.style.transform = `rotate(${degree}deg)`
@@ -359,7 +358,9 @@ class Resizer extends (EventEmitter as { new(): any; }) {
 
   set scale(val: number) {
     this.layout.scale = val
-    this.draw()
+
+    this.resize(this.w, this.h)
+    this.move(this.x, this.y)
   }
 }
 

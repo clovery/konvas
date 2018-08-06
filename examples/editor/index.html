@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { margin: 0; padding: 0; }
+  .konvas {
+    border: 1px solid #00dcff;
+  }
+</style>
+</head>
+<body>
+  <div id="konvas"></div>
+  <div id="app">
+    <button @click="addText">添加文本</button>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
+<script src="../../dist/konvas.js"></script>
+<script>
+const konvas = new Konvas('#konvas', {
+  width: 375,
+  height: 667
+})
+
+new Vue({
+  el: '#app',
+  methods: {
+    addText() {
+      konvas.add({ w: 40, h: 40, x: 0, y: 0, type: 'text', content: 'hello world' })
+    }
+  }
+})
+</script>
+</body>
+</html>

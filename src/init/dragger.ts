@@ -1,23 +1,20 @@
 import Konvas from '../konvas'
 import Dragger from '../dragger'
 import extend from '../utils/extend'
+import { IPoint } from '../interfaces'
 
 export default function(konvas: Konvas, options: object) {
   const dragger = new Dragger(konvas, options)
   konvas.register('dragger', dragger)
-  dragger.addDragger('node')
 
-  dragger.on('start', (id: string) => {
-    const node = konvas.getNode(id)
+  // 拖拽节点
+  dragger.addDragger('node', {
+    onStart(node: any) {
+      konvas.setLiveNode(node)
+    },
 
-    if (node) {
-      konvas.liveNode = node
-    }
-  })
-
-  dragger.on('move', (data: any) => {
-    if (konvas.liveNode) {
-      konvas.liveNode.move(data.x, data.y)
+    onMove(point: IPoint, data: any) {
+      konvas.move(data.point.x, data.point.y)
     }
   })
 
